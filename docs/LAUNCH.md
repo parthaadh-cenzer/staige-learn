@@ -1,11 +1,34 @@
 # Launching STAIGE at learn.staige.world
 
+## Status as of 15 Jul 2026
+
+| Step | State |
+|---|---|
+| 1 · Supabase project `staige-learn` (`gqugktgogwaaykpivlrx`) | ✅ exists |
+| 2 · Migration `0001` + `0002` applied, 7 tables, RLS verified | ✅ **done** |
+| 3 · Auth Site URL + 3 redirect URLs | ✅ already correct |
+| 4 · Supabase keys collected | ⬜ **you** — I don't handle keys |
+| 5 · Stripe products + 6 prices | ⬜ **you** — sandbox still has 0 products |
+| 6 · Stripe webhook endpoint + signing secret | ⬜ **you** |
+| 7 · Vercel env vars (**currently ZERO set**) | ⬜ **you** — blocks everything |
+| 8 · Test payment | ⬜ blocked on 4–7 |
+| Owner account `partha.adh@gmail.com` | ⬜ **you** — sign up, then run the script |
+
+> ### ⚠️ The live site is currently insecure
+> With no `VITE_SUPABASE_*` in Vercel, the deployed bundle has no Supabase client.
+> Before the fix in commit `f87be44`, that made `access.js` fail **open** — every
+> paid lesson, the Prompt Vault and the whole Download Center were readable by
+> anonymous visitors, and no pricing rendered anywhere. The code now fails closed,
+> **but the fix only takes effect once you redeploy.** Until step 7 is done and a
+> deploy lands, treat the live site as giving the product away.
+
+---
+
 Everything that could be done in code is done. What remains needs an account
 password, a billing dashboard or a DNS record — things I deliberately don't touch.
-Work through this top to bottom; it takes about 30 minutes.
 
-**Nothing below is optional.** Until every step is done, the platform runs in its
-signed-out state: courses stay readable and nothing can be purchased.
+**Nothing below is optional.** Until every step is done, the platform cannot sell
+anything.
 
 ---
 
@@ -246,6 +269,26 @@ Worth knowing before you change anything here.
   nothing in the sync path can reduce them. A device whose local copy belongs to a
   *different* account is replaced rather than merged, so two people sharing a
   laptop don't inherit each other's progress.
+
+## The owner account (partha.adh@gmail.com)
+
+There are currently **zero** users in `staige-learn`. Creating an auth user means
+setting a password, which is yours to choose, not mine to invent. So:
+
+1. Finish step 7 and redeploy (sign-up cannot work before that).
+2. Sign up at https://learn.staige.world/signup as `partha.adh@gmail.com`.
+3. Confirm the email and sign in once.
+4. Run [`supabase/scripts/grant_owner_access.sql`](../supabase/scripts/grant_owner_access.sql)
+   in the SQL Editor.
+
+That grants all three active courses with `source = 'owner_access'` and
+`purchase_id = null`. It creates **no** `purchases` row — a fabricated purchase
+would put $15 of revenue in your books that Stripe has never heard of and that
+would never reconcile. The script refuses to run (with a clear message) if the
+account doesn't exist yet, and re-running it is harmless.
+
+The script's final `select` prints the three entitlements plus a
+`purchase_rows_should_be_zero` column — that column must read `0`.
 
 ## Before you publish: two copy decisions
 
