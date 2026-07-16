@@ -40,14 +40,27 @@ export function PriceTag({ course, size = 'md', className = '' }) {
   )
 }
 
-/** The one-line justification under the price. Renders nothing when no offer. */
+/**
+ * The supporting copy under the price.
+ *
+ * "One-time payment. No subscription." is unconditional — it's true whether or
+ * not the launch offer is running, and it's the thing a buyer most wants
+ * confirmed before clicking. The offer line only appears while the offer is
+ * live, and an end date only if the catalogue actually has one. No countdown.
+ */
 export function PriceNote({ course, className = '' }) {
   const view = priceView(course?.product)
-  if (!view?.note) return null
+  if (!view) return null
   return (
-    <p className={`text-xs text-faint ${className}`}>
-      {view.note}
-      {view.endsAt && ` Offer ends ${fmtDate(view.endsAt)}.`}
+    <p className={`text-xs leading-relaxed text-faint ${className}`}>
+      {view.note && (
+        <>
+          {view.note}
+          {view.endsAt && ` Offer ends ${fmtDate(view.endsAt)}.`}
+          <br />
+        </>
+      )}
+      One-time payment. No subscription.
     </p>
   )
 }
@@ -97,12 +110,17 @@ export function BuyButton({ course, className = '', label }) {
     }
   }
 
+  // Signed-out visitors are told what the button will do before it does it —
+  // clicking sends them to sign in, not to Stripe. Purchases are tied to an
+  // account, so there is no anonymous checkout to offer them.
+  const defaultLabel = user ? `Buy for ${view.display}` : 'Sign In to Purchase'
+
   return (
     <div className={className}>
       <button onClick={buy} disabled={busy} className="btn-primary w-full justify-center">
         {busy
           ? <><Loader2 className="h-4 w-4 animate-spin" /> Taking you to checkout…</>
-          : (label || `Get the course — ${view.display}`)}
+          : (label || defaultLabel)}
       </button>
       {error && (
         <p role="alert" className="mt-2 flex items-start gap-1.5 text-xs text-flamingo-500">
@@ -120,10 +138,11 @@ export function BuyButton({ course, className = '', label }) {
  * the page is unchanged for anyone it doesn't apply to.
  */
 export function CoursePurchasePanel({ course }) {
-  const { configured, loading, ownsCourse } = useAuth()
+  const { loading, ownsCourse } = useAuth()
 
-  if (!course?.requiresPurchase || !configured) return null
+  if (!course?.requiresPurchase) return null
   // Say nothing rather than flash an offer at someone who already owns it.
+  // `loading` is only about ownership — the price itself needs no session.
   if (loading || ownsCourse(course.slug)) return null
 
   const preview = course.allLessons?.[0]

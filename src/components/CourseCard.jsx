@@ -24,9 +24,14 @@ import { tone as toneOf } from '../lib/tones'
 // Price on the card, from the same catalogue every other price comes from.
 // Coming Soon courses have no product and so render nothing here — they must
 // never show a price. Owners see that they own it instead of an offer.
+//
+// The price does NOT wait on auth. It comes from shared/catalog.mjs, which is
+// static data compiled into the bundle — Supabase has no say in what a course
+// costs. Gating this on `configured`/`loading` is what made pricing invisible on
+// the live site. Only the *owned* badge needs to know who's asking.
 function CardPrice({ course }) {
-  const { configured, loading, ownsCourse } = useAuth()
-  if (!course.requiresPurchase || !configured || loading) return null
+  const { ownsCourse } = useAuth()
+  if (!course.requiresPurchase) return null
 
   if (ownsCourse(course.slug)) {
     return <span className="pill border-brand-200 text-brand-600">✓ Owned</span>
@@ -35,17 +40,44 @@ function CardPrice({ course }) {
   const v = priceView(course.product)
   return (
     <span className="flex items-center gap-1.5">
+      {v.label && <span className="pill border-brand-200 bg-brand-50 text-brand-600">{v.label}</span>}
       <span className="font-bold text-ink-900">{v.display}</span>
       {v.strikethrough && <span className="text-faint line-through">{v.strikethrough}</span>}
     </span>
   )
 }
 
+// What the card's call-to-action should say, given who's looking.
+//
+// Ownership comes from the entitlement set, per course slug — never from a
+// global "has paid" flag. Owning AI Marketing OS says nothing about this card
+// unless this card IS AI Marketing OS.
+function ctaLabel({ course, cta, user, owned, entitlementsKnown }) {
+  if (!course.requiresPurchase) return cta.label // free/unsellable → unchanged
+  if (owned) {
+    if (cta.done) return 'Course Completed'
+    return cta.started ? 'Continue Learning' : 'Start Course'
+  }
+  // Don't promise a price to someone whose entitlements we haven't loaded yet —
+  // an owner would briefly see "Buy for $5" for their own course on every load.
+  if (!entitlementsKnown) return null
+  return user ? 'Buy for $5' : 'Sign In to Purchase'
+}
+
 export default function CourseCard({ course, size = 'card', className = '' }) {
   const completed = useStore((s) => s.completed)
   const lastLessonId = useStore((s) => s.lastLessonId)
+  const { user, loading, ownedSlugs, ownsCourse } = useAuth()
   const t = toneOf(course.art?.tone || course.themeAccent || 'brand')
   const cta = course.isActive ? courseCta(course, completed, lastLessonId) : null
+
+  const owned = ownsCourse(course.slug)
+  const entitlementsKnown = !loading && (!user || ownedSlugs !== null)
+  const label = cta && ctaLabel({ course, cta, user, owned, entitlementsKnown })
+  // Progress belongs to the owner of the course. Showing "40% complete" to
+  // someone who hasn't bought it (from a previous free-preview session, or from
+  // the era before the paywall) would be confusing and a bit of a tease.
+  const showProgress = cta?.started && (owned || !course.requiresPurchase)
 
   const body = (
     <>
@@ -78,7 +110,7 @@ export default function CourseCard({ course, size = 'card', className = '' }) {
       {/* Progress + CTA — active courses only */}
       {cta && (
         <div className="mt-auto pt-4">
-          {cta.started ? (
+          {showProgress ? (
             <>
               <div className="mb-1.5 flex items-center justify-between text-xs">
                 <span className="text-faint">{cta.done ? 'Complete' : `${cta.pct}% complete`}</span>
@@ -91,9 +123,11 @@ export default function CourseCard({ course, size = 'card', className = '' }) {
           ) : (
             <p className="text-xs font-semibold text-faint">{course.totalLessons} lessons · not started</p>
           )}
-          <span className={`mt-3 inline-flex items-center gap-1.5 text-sm font-semibold ${t.text}`}>
-            {cta.label} <ArrowRight className="h-3.5 w-3.5" />
-          </span>
+          {label && (
+            <span className={`mt-3 inline-flex items-center gap-1.5 text-sm font-semibold ${t.text}`}>
+              {label} <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          )}
         </div>
       )}
     </>

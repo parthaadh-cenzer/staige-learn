@@ -91,7 +91,17 @@ create table if not exists public.course_access (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references auth.users (id) on delete cascade,
   course_id   uuid not null references public.courses (id) on delete cascade,
-  source      text not null default 'purchase' check (source in ('purchase', 'manual', 'gift')),
+  -- How this entitlement came to exist. 'purchase' is the only value the webhook
+  -- ever writes. The administrative values exist so an owner/support grant is
+  -- recorded HONESTLY rather than by fabricating a Stripe purchase that never
+  -- happened — a fake purchase row would corrupt revenue reporting and reconcile
+  -- against nothing in Stripe.
+  source      text not null default 'purchase'
+              check (source in ('purchase', 'manual', 'gift', 'admin_grant', 'owner_access')),
+  -- Deliberately nullable: an administrative grant has no purchase to point at,
+  -- and inventing a purchase id to satisfy a NOT NULL would be the same lie in a
+  -- different column. `on delete set null` keeps the entitlement alive if a
+  -- purchase row is ever removed.
   purchase_id uuid references public.purchases (id) on delete set null,
   granted_at  timestamptz not null default now(),
   revoked_at  timestamptz,

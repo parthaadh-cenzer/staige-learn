@@ -28,9 +28,18 @@ export function canAccessCourse(course, auth, { lessonId } = {}) {
   // ComingSoon screen; they must never render a price or a buy button.
   if (!course.requiresPurchase) return { allowed: true, reason: ACCESS.FREE }
 
-  // Supabase not configured (local dev without keys): don't pretend to sell
-  // anything. Locking a course we can't verify a purchase for would be theatre.
-  if (!auth?.configured) return { allowed: true, reason: ACCESS.FREE }
+  // Supabase not configured. In development that's just someone running the app
+  // without keys, and unlocking everything is the convenient answer.
+  //
+  // In PRODUCTION it means the deploy is broken — and "broken" must never mean
+  // "give the paid product away". This fails closed. It shipped the other way
+  // round once and handed the entire Download Center to anonymous visitors on
+  // learn.staige.world; a locked course is a bug, an unlocked one is a refund.
+  if (!auth?.configured) {
+    return import.meta.env.DEV
+      ? { allowed: true, reason: ACCESS.FREE }
+      : { allowed: false, reason: ACCESS.SIGN_IN }
+  }
 
   if (auth.loading) return { allowed: false, reason: ACCESS.UNKNOWN }
 
