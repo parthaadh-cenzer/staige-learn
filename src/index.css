@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-canvas text-ink-800 antialiased;
+  /* Barely-there sage warmth — calm, never neon */
+  background-image:
+    radial-gradient(48rem 48rem at 100% -10%, rgba(92, 161, 58, 0.06), transparent 60%),
+    radial-gradient(40rem 40rem at -10% 0%, rgba(79, 191, 154, 0.05), transparent 55%);
+  background-attachment: fixed;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(92, 161, 58, 0.22);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(92, 161, 58, 0.4);
+  background-clip: padding-box;
+}
+
+@layer components {
+  .card {
+    @apply rounded-3xl border border-line bg-card shadow-soft;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card hover:border-line-strong;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-sage-50 px-3 py-1 text-xs font-semibold;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply btn bg-brand-500 text-white shadow-soft hover:bg-brand-600 active:scale-[0.98];
+  }
+  .btn-mint {
+    @apply btn bg-mint-500 text-white hover:brightness-105 active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply btn border border-line bg-card text-ink-700 hover:bg-sage-50 hover:border-line-strong;
+  }
+  .input {
+    @apply w-full rounded-2xl border border-line bg-card px-4 py-3 text-sm text-ink-900 placeholder:text-faint transition focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-500/10;
+  }
+  /* Accent for words inside a heading. Solid brand green — never a gradient:
+     gradient text washes out at small sizes and drops contrast on the canvas. */
+  .heading-accent {
+    @apply text-brand-600;
+  }
+
+  /* Horizontal browsing rails: hide the scrollbar chrome without disabling
+     scrolling — swipe, wheel and keyboard all still work. */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

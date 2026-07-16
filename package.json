@@ -1,0 +1,33 @@
+{
+  "name": "ai-side-hustle-os-lite",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "AI Side Hustle OS Lite — an interactive learning platform by John Cenzer",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.6",
+    "docx": "^9.7.1",
+    "framer-motion": "^11.3.19",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
+    "lucide-react": "^0.417.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
+    "stripe": "^22.3.2",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.40",
+    "tailwindcss": "^3.4.7",
+    "vite": "^5.3.5"
+  }
+}

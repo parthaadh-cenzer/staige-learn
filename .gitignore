@@ -1,0 +1,14 @@
+node_modules
+dist
+.DS_Store
+*.local
+.vite
+.vercel
+
+# Secrets. `*.local` above already catches .env.local, but only by accident of
+# the suffix — these rules are explicit so a `.env` or `.env.production` created
+# in a hurry can never be committed. .env.example is the one file that may be:
+# it contains names, never values.
+.env
+.env.*
+!.env.example
