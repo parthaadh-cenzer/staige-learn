@@ -28,6 +28,14 @@ export function canAccessCourse(course, auth, { lessonId } = {}) {
   // ComingSoon screen; they must never render a price or a buy button.
   if (!course.requiresPurchase) return { allowed: true, reason: ACCESS.FREE }
 
+  // The free sample — open to everyone, including signed-out visitors, and
+  // decided BEFORE any auth state is consulted: whether a lesson is the free
+  // preview comes from the registry, which is static data. Checking it first
+  // means the preview survives every auth condition below — loading, broken
+  // config, signed out — because a lesson that costs nothing has nothing to
+  // fail closed over.
+  if (lessonId && course.isPreviewLesson?.(lessonId)) return { allowed: true, reason: ACCESS.PREVIEW }
+
   // Supabase not configured. In development that's just someone running the app
   // without keys, and unlocking everything is the convenient answer.
   //
@@ -47,9 +55,6 @@ export function canAccessCourse(course, auth, { lessonId } = {}) {
 
   // Signed in, entitlements not back yet.
   if (auth.user && auth.ownedSlugs === null) return { allowed: false, reason: ACCESS.UNKNOWN }
-
-  // The free sample — open to everyone, including signed-out visitors.
-  if (lessonId && course.isPreviewLesson?.(lessonId)) return { allowed: true, reason: ACCESS.PREVIEW }
 
   return { allowed: false, reason: auth.user ? ACCESS.PURCHASE : ACCESS.SIGN_IN }
 }

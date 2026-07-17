@@ -105,7 +105,11 @@ export default function Auth({ page = 'login' }) {
           password,
           options: {
             data: { display_name: name.trim() || undefined },
-            emailRedirectTo: `${window.location.origin}/login`,
+            // Carry the intended destination through the confirmation email, so
+            // someone who clicked "Start Building" on an OS lands back on that
+            // OS after confirming — signed in, entitlements loaded, still locked
+            // until they actually buy. The redirect changes navigation only.
+            emailRedirectTo: `${window.location.origin}/login${next !== '/' ? `?next=${encodeURIComponent(next)}` : ''}`,
           },
         })
         if (error) throw error

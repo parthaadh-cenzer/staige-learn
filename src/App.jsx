@@ -4,7 +4,8 @@ import Onboarding from './components/Onboarding'
 import HomeLayout from './components/HomeLayout'
 import { useStore } from './store/useStore'
 import { courses, DEFAULT_COURSE_SLUG, courseBase, getCourseBySlug } from './data/courses'
-import Home from './pages/Home'
+import Landing from './pages/Landing'
+import LearnerDashboard from './pages/LearnerDashboard'
 import Courses from './pages/Courses'
 import Settings from './pages/Settings'
 import Legal from './pages/Legal'
@@ -35,8 +36,26 @@ const LazyCourseShell = () => (
 const DEFAULT_BASE = courseBase(DEFAULT_COURSE_SLUG) // /launchpad/ai-side-hustle-os
 
 function ScrollTop() {
-  const { pathname } = useLocation()
-  useEffect(() => { window.scrollTo({ top: 0 }) }, [pathname])
+  const { pathname, hash } = useLocation()
+  useEffect(() => {
+    // The landing nav links to /#systems, /#pricing etc. from any page, so a
+    // hash means "scroll to that section". Deferred a frame so the section is
+    // laid out when the target page mounted in this same commit; smooth only
+    // for people who haven't asked for reduced motion.
+    if (hash) {
+      const id = hash.slice(1)
+      // setTimeout rather than requestAnimationFrame: rAF is starved in hidden
+      // tabs, and a background tab opened at /#pricing should still land there.
+      const t = setTimeout(() => {
+        const el = document.getElementById(id)
+        if (!el) return
+        const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+        el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+      }, 0)
+      return () => clearTimeout(t)
+    }
+    window.scrollTo({ top: 0 })
+  }, [pathname, hash])
   return null
 }
 
@@ -77,8 +96,14 @@ export default function App() {
       {!onboarded && <Onboarding />}
       <ScrollTop />
       <Routes>
-        {/* The homepage IS the landing page now. */}
-        <Route path="/" element={<Platform><Home /></Platform>} />
+        {/* Public brand homepage. Signed-in visitors may still browse it —
+            the nav and CTAs steer them to /dashboard, nothing forces them. */}
+        <Route path="/" element={<Platform><Landing /></Platform>} />
+
+        {/* The personalised home — everything the old homepage knew about YOU
+            lives here now, behind the session it always needed anyway. */}
+        <Route path="/dashboard" element={<Platform><RequireAuth><LearnerDashboard /></RequireAuth></Platform>} />
+
         <Route path="/courses" element={<Platform><Courses /></Platform>} />
         <Route path="/settings" element={<Platform><Settings /></Platform>} />
         <Route path="/contact" element={<Platform><Legal page="contact" /></Platform>} />

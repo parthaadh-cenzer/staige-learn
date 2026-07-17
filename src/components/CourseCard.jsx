@@ -55,8 +55,8 @@ function CardPrice({ course }) {
 function ctaLabel({ course, cta, user, owned, entitlementsKnown }) {
   if (!course.requiresPurchase) return cta.label // free/unsellable → unchanged
   if (owned) {
-    if (cta.done) return 'Course Completed'
-    return cta.started ? 'Continue Learning' : 'Start Course'
+    if (cta.done) return 'OS Completed'
+    return cta.started ? 'Continue Building' : 'Start OS'
   }
   // Don't promise a price to someone whose entitlements we haven't loaded yet —
   // an owner would briefly see "Buy for $5" for their own course on every load.

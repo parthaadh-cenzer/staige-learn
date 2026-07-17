@@ -16,25 +16,34 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, LayoutGrid, Library, FolderOpen, Trophy, Settings, Menu, X, User, LogOut, ChevronDown } from 'lucide-react'
+import { LayoutDashboard, LayoutGrid, Library, FolderOpen, Trophy, Settings, Menu, X, User, LogOut, ChevronDown, Tag, HelpCircle, Bot } from 'lucide-react'
 import StaigeMark, { StaigeWordmark } from './StaigeMark'
 import MascotAdvisor from './MascotAdvisor'
 import { useActiveCourse, resourceRoute } from '../course/useActiveCourse'
 import { courseBase } from '../data/courses'
 import { useAuth } from '../auth/AuthProvider'
+import { CONTACT_EMAIL } from '../pages/Legal'
 
-// The platform nav. Prompt Vault / Resources / Achievements are course-scoped
-// pages, so from the homepage they deep-link into whichever course the learner
-// is actually in the middle of (see useActiveCourse).
-function navLinks(course) {
+// Two navs, one bar. Signed out, the nav sells: it walks the landing page's
+// sections. Signed in, it works: dashboard first, then the learner's tools.
+// Prompt Vault / Resources / Achievements are course-scoped pages, so they
+// deep-link into whichever course the learner is in the middle of.
+function navLinks(user, course) {
+  if (!user) {
+    return [
+      { to: '/#how-it-works', label: 'How It Works', icon: HelpCircle, hash: true },
+      { to: '/#systems', label: 'Operating Systems', icon: LayoutGrid, hash: true },
+      { to: '/#capy-byte', label: 'Meet Capy & Byte', icon: Bot, hash: true },
+      { to: '/#pricing', label: 'Pricing', icon: Tag, hash: true },
+    ]
+  }
   const base = course ? courseBase(course.slug) : '/courses'
   return [
-    { to: '/', label: 'Home', icon: Home, end: true },
-    { to: '/courses', label: 'Courses', icon: LayoutGrid },
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/courses', label: 'Operating Systems', icon: LayoutGrid },
     { to: course?.features?.prompts ? `${base}/prompts` : '/courses', label: 'Prompt Vault', icon: Library },
     { to: course ? `${base}/${resourceRoute(course)}` : '/courses', label: 'Resources', icon: FolderOpen },
     { to: course ? `${base}/badges` : '/courses', label: 'Achievements', icon: Trophy },
-    { to: '/settings', label: 'Settings', icon: Settings },
   ]
 }
 
@@ -43,30 +52,25 @@ const linkCls = ({ isActive }) =>
     isActive ? 'bg-brand-50 text-brand-700' : 'text-ink-600 hover:bg-sage-50 hover:text-ink-900'
   }`
 
-const FOOTER = {
-  Platform: [
-    { to: '/courses', label: 'Courses' },
-    { to: '/settings', label: 'Settings' },
-  ],
-  Learn: [], // filled from the active course below
-  STAIGE: [
-    { to: '/contact', label: 'Contact' },
-    { to: '/privacy', label: 'Privacy' },
-    { to: '/terms', label: 'Terms' },
-  ],
+// Hash links can't be NavLinks (they'd all "match" /), and the primary CTA is
+// a button. This renders whichever a link wants to be.
+function NavItem({ link, onClick }) {
+  return link.hash ? (
+    <Link to={link.to} onClick={onClick} className={linkCls({ isActive: false })}>
+      <link.icon className="h-4 w-4" /> {link.label}
+    </Link>
+  ) : (
+    <NavLink to={link.to} end={link.end} onClick={onClick} className={linkCls}>
+      <link.icon className="h-4 w-4" /> {link.label}
+    </NavLink>
+  )
 }
 
 export default function HomeLayout({ children }) {
   const [open, setOpen] = useState(false)
   const course = useActiveCourse()
-  const links = navLinks(course)
-  const base = course ? courseBase(course.slug) : '/courses'
-
-  const footerLearn = [
-    { to: course?.features?.prompts ? `${base}/prompts` : '/courses', label: 'Prompt Vault' },
-    { to: course ? `${base}/${resourceRoute(course)}` : '/courses', label: 'Resources' },
-    { to: course ? `${base}/badges` : '/courses', label: 'Achievements' },
-  ]
+  const { user } = useAuth()
+  const links = navLinks(user, course)
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -84,11 +88,7 @@ export default function HomeLayout({ children }) {
           <StaigeMark />
 
           <nav aria-label="Platform" className="ml-auto hidden items-center gap-1 lg:flex">
-            {links.map((l) => (
-              <NavLink key={l.label} to={l.to} end={l.end} className={linkCls}>
-                <l.icon className="h-4 w-4" /> {l.label}
-              </NavLink>
-            ))}
+            {links.map((l) => <NavItem key={l.label} link={l} />)}
             <AccountNav />
           </nav>
 
@@ -125,11 +125,7 @@ export default function HomeLayout({ children }) {
                 </button>
               </div>
               <nav aria-label="Platform" className="space-y-1">
-                {links.map((l) => (
-                  <NavLink key={l.label} to={l.to} end={l.end} onClick={() => setOpen(false)} className={linkCls}>
-                    <l.icon className="h-4 w-4" /> {l.label}
-                  </NavLink>
-                ))}
+                {links.map((l) => <NavItem key={l.label} link={l} onClick={() => setOpen(false)} />)}
               </nav>
               <AccountLinks className="mt-4 border-t border-line pt-4" onNavigate={() => setOpen(false)} />
             </motion.aside>
@@ -143,33 +139,40 @@ export default function HomeLayout({ children }) {
 
       <footer className="mt-8 border-t border-line bg-sage-50/60">
         <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
             <div>
               <StaigeWordmark size="sm" />
-              <p className="mt-3 max-w-xs text-sm text-muted">
-                Practical AI operating systems — not tool tours. Built with Capy &amp; Byte.
+              <p className="mt-2 max-w-xs text-sm text-muted">
+                Learn less. Build more.
               </p>
             </div>
-            {[['Platform', FOOTER.Platform], ['Learn', footerLearn], ['STAIGE', FOOTER.STAIGE]].map(([heading, items]) => (
-              <div key={heading}>
-                <h2 className="font-display text-sm font-bold text-ink-900">{heading}</h2>
-                <ul className="mt-3 space-y-2">
-                  {items.map((i) => (
-                    <li key={i.label}>
-                      <Link
-                        to={i.to}
-                        className="rounded text-sm text-muted transition hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40"
-                      >
-                        {i.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {/* Deliberately one short list — the footer is a map, not a second nav. */}
+            <nav aria-label="Footer">
+              <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+                {[
+                  { to: user ? '/courses' : '/#systems', label: 'Operating Systems' },
+                  { to: '/#how-it-works', label: 'How It Works' },
+                  { to: '/#pricing', label: 'Pricing' },
+                  user ? { to: '/dashboard', label: 'Dashboard' } : { to: '/login', label: 'Sign In' },
+                  { to: '/contact', label: 'Contact' },
+                  { to: '/privacy', label: 'Privacy' },
+                  { to: '/terms', label: 'Terms' },
+                ].map((i) => (
+                  <li key={i.label}>
+                    <Link to={i.to} className="rounded text-muted transition hover:text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40">
+                      {i.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           </div>
           <div className="mt-8 border-t border-line pt-6 text-xs text-faint">
-            © {new Date().getFullYear()} STAIGE · Sign in and your progress follows you to every device.
+            © {new Date().getFullYear()} STAIGE
+            {CONTACT_EMAIL && (
+              <> · <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-brand-700">{CONTACT_EMAIL}</a></>
+            )}
+            {' '}· Sign in and your progress follows you to every device.
           </div>
         </div>
       </footer>
@@ -202,8 +205,8 @@ function AccountNav() {
   if (!user) {
     return (
       <div className="ml-2 flex items-center gap-2">
-        <Link to="/login" className={linkCls({ isActive: false })}>Sign in</Link>
-        <Link to="/signup" className="btn-primary !px-3.5 !py-2 !text-sm">Sign up</Link>
+        <Link to="/login" className={linkCls({ isActive: false })}>Sign In</Link>
+        <Link to="/signup" className="btn-primary !px-4 !py-2 !text-sm">Start Building</Link>
       </div>
     )
   }
@@ -236,6 +239,10 @@ function AccountNav() {
             <Link to="/profile" role="menuitem" onClick={() => setOpen(false)} className={linkCls({ isActive: false })}>
               <User className="h-4 w-4" /> Your account
             </Link>
+            {/* Settings left the top bar when Dashboard arrived; it lives here now. */}
+            <Link to="/settings" role="menuitem" onClick={() => setOpen(false)} className={linkCls({ isActive: false })}>
+              <Settings className="h-4 w-4" /> Settings
+            </Link>
             <button
               role="menuitem"
               onClick={() => { setOpen(false); signOut() }}
@@ -262,6 +269,9 @@ function AccountLinks({ className = '', onNavigate }) {
           <Link to="/profile" onClick={onNavigate} className={linkCls({ isActive: false })}>
             <User className="h-4 w-4" /> Your account
           </Link>
+          <Link to="/settings" onClick={onNavigate} className={linkCls({ isActive: false })}>
+            <Settings className="h-4 w-4" /> Settings
+          </Link>
           <button onClick={() => { onNavigate?.(); signOut() }} className={`w-full ${linkCls({ isActive: false })}`}>
             <LogOut className="h-4 w-4" /> Sign out
           </button>
@@ -269,10 +279,10 @@ function AccountLinks({ className = '', onNavigate }) {
       ) : (
         <>
           <Link to="/login" onClick={onNavigate} className={linkCls({ isActive: false })}>
-            <User className="h-4 w-4" /> Sign in
+            <User className="h-4 w-4" /> Sign In
           </Link>
           <Link to="/signup" onClick={onNavigate} className="btn-primary mt-2 w-full justify-center !text-sm">
-            Sign up
+            Start Building
           </Link>
         </>
       )}
