@@ -33,6 +33,38 @@ const course = {
   goal: { emoji: '💰', label: 'Earn Extra Income', order: 1 },
   collections: ['business'],
 
+  // ── Sales page (see pages/OsSalesPage.jsx + course/sales.js) ──────────────
+  sales: {
+    hero: {
+      headline: 'Go from “I want to start something”\nto “I launched.”',
+      sub: 'Pick a lane, shape an offer people actually want, and get to your first paying customer — one guided step at a time.',
+    },
+    problems: [
+      { icon: 'Shuffle', title: 'Too many ideas', text: 'Twelve tabs, twelve maybes, and no way to tell which one is worth a weekend.' },
+      { icon: 'Hourglass', title: 'No execution', text: 'You’ve “researched” for months. The idea is still an idea, not an offer.' },
+      { icon: 'Compass', title: 'Don’t know where to begin', text: 'Everyone says “just start” — nobody says with what, or in what order.' },
+    ],
+    builds: [
+      'A validated business idea',
+      'An offer people actually want',
+      'Your landing assets',
+      'A concrete launch plan',
+      'A first-customer workflow',
+    ],
+    audience: {
+      yes: ['Total beginners', 'People with an idea but no plan', 'Nine-to-fivers starting on the side', 'Students and recent grads', 'Anyone who’s researched for months but never shipped'],
+      no: ['You want passive income with no work', 'You won’t talk to a single customer', 'You’re looking for a get-rich-quick scheme'],
+    },
+    faq: [
+      { q: 'Do I need an idea already?', a: 'No. Module 1 is about choosing a lane and picking an idea worth your time — you can start from a completely blank page.' },
+      { q: 'Do I need money to start?', a: 'No. The whole system is built to get you a first paying customer before you spend on tools or ads. You validate first, invest later.' },
+    ],
+    finalCta: {
+      headline: 'Ready to actually launch?',
+      sub: 'Stop collecting ideas. Build the one that gets you your first paying customer.',
+    },
+  },
+
   // ── Presentation ──────────────────────────────────────────────────────────
   themeAccent: 'brand',                // tone key from src/lib/tones.js (green)
   mascotMode: 'capy-byte',             // which mascot system to use (Capy + Byte)

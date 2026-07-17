@@ -69,7 +69,7 @@ export function PriceNote({ course, className = '' }) {
  * Starts Checkout. Sends only the product key — the price is the server's
  * decision (api/_lib/pricing.mjs), so this button cannot name an amount.
  */
-export function BuyButton({ course, className = '', label }) {
+export function BuyButton({ course, className = '', label, signedOutLabel = 'Sign In to Purchase', returnTo }) {
   const { user, ownsCourse } = useAuth()
   const navigate = useNavigate()
   const [busy, setBusy] = useState(false)
@@ -90,8 +90,12 @@ export function BuyButton({ course, className = '', label }) {
 
   const buy = async () => {
     if (!user) {
-      // Come back to this course after signing in.
-      navigate(`/login?next=${encodeURIComponent(`/launchpad/${course.slug}`)}`)
+      // Come back to where they were after signing in. `returnTo` lets the OS
+      // sales page send them back to itself; other surfaces default to the
+      // course overview. A crafted value can only change navigation, never
+      // access, so no validation beyond same-site is needed here.
+      const dest = returnTo || `/launchpad/${course.slug}`
+      navigate(`/login?next=${encodeURIComponent(dest)}`)
       return
     }
     setBusy(true)
@@ -112,15 +116,16 @@ export function BuyButton({ course, className = '', label }) {
 
   // Signed-out visitors are told what the button will do before it does it —
   // clicking sends them to sign in, not to Stripe. Purchases are tied to an
-  // account, so there is no anonymous checkout to offer them.
-  const defaultLabel = user ? `Buy for ${view.display}` : 'Sign In to Purchase'
+  // account, so there is no anonymous checkout to offer them. `label` overrides
+  // the signed-in text; `signedOutLabel` overrides the signed-out text.
+  const text = label || (user ? `Buy for ${view.display}` : signedOutLabel)
 
   return (
     <div className={className}>
       <button onClick={buy} disabled={busy} className="btn-primary w-full justify-center">
         {busy
           ? <><Loader2 className="h-4 w-4 animate-spin" /> Taking you to checkout…</>
-          : (label || defaultLabel)}
+          : text}
       </button>
       {error && (
         <p role="alert" className="mt-2 flex items-start gap-1.5 text-xs text-flamingo-500">

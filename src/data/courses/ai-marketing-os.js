@@ -35,6 +35,38 @@ const course = {
   goal: { emoji: '📈', label: 'Grow Your Business', order: 3 },
   collections: ['business'],
 
+  // ── Sales page (see pages/OsSalesPage.jsx + course/sales.js) ──────────────
+  sales: {
+    hero: {
+      headline: 'Turn AI into your\nmarketing department.',
+      sub: 'Content, design, email, social, analytics and automation — one always-on system that runs weekly, instead of a scramble that eats your week.',
+    },
+    problems: [
+      { icon: 'Clock', title: 'Content takes forever', text: 'Every post starts from a blank page, and the blank page always wins.' },
+      { icon: 'Repeat', title: 'No consistency', text: 'You post for a week, go quiet for a month, and the momentum resets every time.' },
+      { icon: 'Bot', title: 'No automation', text: 'You’re doing by hand what a workflow should do for you — so it never scales past you.' },
+    ],
+    builds: [
+      'A repeatable content engine',
+      'A reusable prompt library',
+      'A campaign workflow',
+      'Your own AI marketing stack',
+      'Marketing SOPs you run weekly',
+    ],
+    audience: {
+      yes: ['Founders & solo business owners', 'Freelancers and consultants', 'Marketers who want leverage', 'Creators growing an audience', 'Small teams with no marketing hire'],
+      no: ['You want followers overnight', 'You won’t publish anything', 'You expect AI to run the business for you'],
+    },
+    faq: [
+      { q: 'Do I need design or marketing experience?', a: 'No. It’s built for beginner to intermediate — every lesson brings one real marketing problem and the exact workflow to solve it.' },
+      { q: 'Which AI tools do I need to buy?', a: 'Start with the free Starter Stack. Byte’s tool library is organised by workflow, and you only add a paid tool when a real limit forces it — never “just in case.”' },
+    ],
+    finalCta: {
+      headline: 'Ready to make marketing a system?',
+      sub: 'Stop scrambling for content. Build the engine that runs every week.',
+    },
+  },
+
   // ── Presentation ──────────────────────────────────────────────────────────
   themeAccent: 'brand',
   mascotMode: 'capy-byte',

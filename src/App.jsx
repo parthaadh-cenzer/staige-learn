@@ -6,6 +6,7 @@ import { useStore } from './store/useStore'
 import { courses, DEFAULT_COURSE_SLUG, courseBase, getCourseBySlug } from './data/courses'
 import Landing from './pages/Landing'
 import LearnerDashboard from './pages/LearnerDashboard'
+import OsSalesPage from './pages/OsSalesPage'
 import Courses from './pages/Courses'
 import Settings from './pages/Settings'
 import Legal from './pages/Legal'
@@ -105,6 +106,11 @@ export default function App() {
         <Route path="/dashboard" element={<Platform><RequireAuth><LearnerDashboard /></RequireAuth></Platform>} />
 
         <Route path="/courses" element={<Platform><Courses /></Platform>} />
+
+        {/* One reusable sales page per Operating System, generated from the
+            registry. Public — the value pitch a visitor reads BEFORE buying. */}
+        <Route path="/os/:slug" element={<Platform><OsSalesPage /></Platform>} />
+
         <Route path="/settings" element={<Platform><Settings /></Platform>} />
         <Route path="/contact" element={<Platform><Legal page="contact" /></Platform>} />
         <Route path="/privacy" element={<Platform><Legal page="privacy" /></Platform>} />

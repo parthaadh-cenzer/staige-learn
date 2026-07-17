@@ -110,6 +110,21 @@ export const defaultCourse = getCourseBySlug(DEFAULT_COURSE_SLUG)
 // URL helper — base path for a course's pages.
 export const courseBase = (slug) => `/launchpad/${slug}`
 
+// ── Sales-page URLs ───────────────────────────────────────────────────────────
+// Every OS gets a public sales page at /os/<short-slug> (e.g. /os/job-hunter).
+// The short slug drops the "ai-" prefix and "-os" suffix so the marketing URL
+// reads cleanly; the resolver below also accepts the full slug. Both are
+// derived, never a hardcoded map, so a new OS gets its sales URL for free.
+export const osShortSlug = (slug) => slug.replace(/^ai-/, '').replace(/-os$/, '')
+export const osPath = (course) => `/os/${osShortSlug(course.slug)}`
+
+// Resolve an /os/:slug param to a course — accepts the short slug OR the full
+// slug, so /os/job-hunter and /os/ai-job-hunter-os both land on the same page.
+export const getCourseByOsParam = (param) => {
+  const p = String(param || '').toLowerCase()
+  return getCourseBySlug(p) || courses.find((c) => osShortSlug(c.slug) === p)
+}
+
 // ── Homepage selectors ──────────────────────────────────────────────────────
 // Every one of these is derived. The homepage never names a course.
 

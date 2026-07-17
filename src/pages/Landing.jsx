@@ -16,7 +16,7 @@ import {
   ArrowRight, BookOpen, Signal, Lock, Hammer, Rocket, CheckCircle2, XCircle,
   Library, Bot, Download, ListChecks, LayoutDashboard, Workflow, Flag, CloudUpload,
 } from 'lucide-react'
-import { activeCourses, getCourseBySlug, courseBase } from '../data/courses'
+import { activeCourses, getCourseBySlug, courseBase, osPath } from '../data/courses'
 import { useAuth } from '../auth/AuthProvider'
 import { PriceTag, PriceNote, BuyButton } from '../components/Pricing'
 import HeroStory, { STORIES } from '../components/HeroStory'
@@ -207,10 +207,10 @@ function OsCard({ course }) {
           </>
         )}
         <Link
-          to={courseBase(course.slug)}
+          to={osPath(course)}
           className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink-900"
         >
-          View Details <ArrowRight className="h-3.5 w-3.5" />
+          Explore OS <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
     </div>

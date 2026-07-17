@@ -39,6 +39,41 @@ const course = {
   goal: { emoji: '💼', label: 'Get Hired', order: 2 },
   collections: ['career'],
 
+  // ── Sales page (see pages/OsSalesPage.jsx + course/sales.js) ──────────────
+  // The persuasive copy no algorithm can derive. Everything else on the sales
+  // page — modules, resources, price, FAQ basics — is generated from the data
+  // above and the content below, so this block stays small.
+  sales: {
+    hero: {
+      headline: 'Land better interviews.\nGet more offers.\nStop applying randomly.',
+      sub: 'Build a repeatable job-search system — resume, LinkedIn, interviews, offers — that gets you better replies from fewer, better applications. And keep it for every job after this one.',
+    },
+    problems: [
+      { icon: 'Send', title: 'Applying everywhere', text: '250 applications, silence. It feels like effort — but volume was never the strategy.' },
+      { icon: 'FileX', title: 'Resume ignored', text: 'The ATS filters you out before a human ever reads it, and you never find out why.' },
+      { icon: 'CalendarX', title: 'No interviews', text: 'You’re qualified, but the calls aren’t coming — and you can’t tell what to change.' },
+    ],
+    builds: [
+      'An ATS-ready, tailored resume',
+      'A LinkedIn profile recruiters find',
+      'A networking system that isn’t awkward',
+      'An interview preparation workflow',
+      'A job tracker that runs your search',
+    ],
+    audience: {
+      yes: ['Students & new graduates', 'Career changers', 'International students', 'Working professionals leveling up', 'Anyone tired of applying into the void'],
+      no: ['You want an instant offer with zero effort', 'You won’t practise or do the missions', 'You expect AI to run the whole search for you'],
+    },
+    faq: [
+      { q: 'Will this get me a job?', a: 'No honest course can promise that. What this gives you is a system that gets better interviews from fewer, better applications — and offers come from interviews. It makes sure you get into more of them.' },
+      { q: 'Does it write fake experience?', a: 'Never. Every prompt is built to describe what you genuinely did, more clearly — not to invent what you didn’t. A resume that lies gets found out in the interview.' },
+    ],
+    finalCta: {
+      headline: 'Ready to stop applying randomly?',
+      sub: 'Build the system that gets you better interviews — and keep it for every job after this one.',
+    },
+  },
+
   // ── Presentation ──────────────────────────────────────────────────────────
   themeAccent: 'brand',
   mascotMode: 'capy-byte',

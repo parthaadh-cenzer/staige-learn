@@ -52,10 +52,14 @@ export function CheckoutSuccess() {
           <strong className="text-ink-900">{course.title}</strong> is unlocked on your account. It’ll be
           waiting on any device you sign in to.
         </p>
-        <Link to={courseBase(course.slug)} className="btn-primary mt-6 justify-center">
-          Start the course
+        {/* A completed purchase lands the customer in their dashboard — their
+            home now, with everything they own. Starting the course is one click. */}
+        <Link to="/dashboard" className="btn-primary mt-6 justify-center">
+          Go to your dashboard
         </Link>
-        <Link to="/courses" className="btn-ghost mt-2.5 justify-center">Browse all courses</Link>
+        <Link to={courseBase(course.slug)} className="btn-ghost mt-2.5 justify-center">
+          Start {course.title} now
+        </Link>
       </Frame>
     )
   }

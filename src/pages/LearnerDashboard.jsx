@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { useAuth } from '../auth/AuthProvider'
-import { activeCourses, comingSoonCourses, courseBase } from '../data/courses'
+import { activeCourses, comingSoonCourses, courseBase, osPath } from '../data/courses'
 import { courseCta, courseXp } from '../course/progress'
 import { useActiveCourse, resourceRoute } from '../course/useActiveCourse'
 import { ProgressBar, Reveal } from '../components/ui'
@@ -124,10 +124,10 @@ function LockedOsCard({ course }) {
         <PriceNote course={course} className="mt-1.5" />
         <BuyButton course={course} className="mt-3" label="Buy for $5" />
         <Link
-          to={courseBase(course.slug)}
+          to={osPath(course)}
           className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink-900"
         >
-          View Details <ArrowRight className="h-3.5 w-3.5" />
+          Explore OS <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
     </div>
