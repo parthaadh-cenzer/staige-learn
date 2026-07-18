@@ -11,6 +11,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { CheckCircle2, Loader2, Clock } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { getCourseBySlug, courseBase } from '../data/courses'
+import { apiPost } from '../lib/supabase'
 import { Capy } from '../components/mascots'
 
 // Card networks usually settle in a second or two, but the webhook is a network
@@ -29,17 +30,26 @@ export function CheckoutSuccess() {
   // `course_access` through RLS — says the row exists. Editing this parameter
   // changes which course we ask about, and nothing else.
   const course = getCourseBySlug(params.get('course') || '')
+  const sessionId = params.get('session_id') || ''
   const unlocked = Boolean(course && ownsCourse(course.slug))
 
   useEffect(() => {
     if (unlocked || !user || loading) return
     if (waited >= GIVE_UP_MS) return
-    const t = setTimeout(() => {
-      refreshEntitlements()
+    const t = setTimeout(async () => {
+      // Two ways to learn the entitlement landed, tried together:
+      //   1. Ask our server to reconcile against Stripe (works even if the
+      //      webhook is delayed). It's idempotent and only grants for a real
+      //      paid session that belongs to THIS user — the redirect never grants.
+      //   2. Re-read course_access through RLS (catches the webhook's own write).
+      if (sessionId) {
+        await apiPost('/api/verify-checkout', { sessionId }).catch(() => {})
+      }
+      await refreshEntitlements()
       setWaited((w) => w + POLL_MS)
     }, POLL_MS)
     return () => clearTimeout(t)
-  }, [unlocked, user, loading, waited, refreshEntitlements])
+  }, [unlocked, user, loading, waited, sessionId, refreshEntitlements])
 
   if (unlocked) {
     return (
@@ -75,7 +85,14 @@ export function CheckoutSuccess() {
           This occasionally takes a few minutes. Your course unlocks automatically the moment it clears —
           you don’t need to pay again or do anything else. Refresh this page, or check back shortly.
         </p>
-        <button onClick={() => refreshEntitlements()} className="btn-primary mt-6 justify-center">
+        <button
+          onClick={async () => {
+            if (sessionId) await apiPost('/api/verify-checkout', { sessionId }).catch(() => {})
+            await refreshEntitlements()
+            setWaited(0)
+          }}
+          className="btn-primary mt-6 justify-center"
+        >
           Check again
         </button>
         <Link to="/" className="btn-ghost mt-2.5 justify-center">Back to STAIGE</Link>

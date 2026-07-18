@@ -19,6 +19,7 @@ export function AuthProvider({ children }) {
   // what stops a signed-in learner seeing a flash of "Sign in" on every refresh.
   const [loading, setLoading] = useState(isSupabaseConfigured)
   const [owned, setOwned] = useState(null) // Set<courseSlug> | null while unknown
+  const [admin, setAdmin] = useState(false)
   const mounted = useRef(true)
 
   // Setting this back to true on mount is load-bearing, not belt-and-braces.
@@ -82,11 +83,23 @@ export function AuthProvider({ children }) {
     setOwned(new Set(error ? [] : (data || []).map((r) => r.courses?.slug).filter(Boolean)))
   }, [userId])
 
+  // ── Admin ──────────────────────────────────────────────────────────────────
+  // Read-only: RLS lets a user see their OWN admin row and nothing else, and
+  // there's no write policy, so this reflects a server-set fact — it can't be
+  // spoofed from the client. It gates UI affordances only; any real admin
+  // action must re-check on the server (api/_lib/clients.mjs#requireAdmin).
+  const loadAdmin = useCallback(async () => {
+    if (!supabase || !userId) return setAdmin(false)
+    const { data } = await supabase.from('admins').select('user_id').eq('user_id', userId).maybeSingle()
+    if (mounted.current) setAdmin(Boolean(data))
+  }, [userId])
+
   useEffect(() => {
-    if (!userId) { setProfile(null); setOwned(null); return }
+    if (!userId) { setProfile(null); setOwned(null); setAdmin(false); return }
     loadProfile()
     loadEntitlements()
-  }, [userId, loadProfile, loadEntitlements])
+    loadAdmin()
+  }, [userId, loadProfile, loadEntitlements, loadAdmin])
 
   const value = useMemo(
     () => ({
@@ -98,11 +111,12 @@ export function AuthProvider({ children }) {
       // null → not known yet (signed out, or still loading).
       ownedSlugs: owned,
       ownsCourse: (slug) => Boolean(owned?.has(slug)),
+      isAdmin: admin,
       refreshProfile: loadProfile,
       refreshEntitlements: loadEntitlements,
       signOut: () => supabase?.auth.signOut(),
     }),
-    [loading, session, user, profile, owned, loadProfile, loadEntitlements]
+    [loading, session, user, profile, owned, admin, loadProfile, loadEntitlements]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

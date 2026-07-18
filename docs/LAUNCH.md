@@ -1,18 +1,30 @@
 # Launching STAIGE at learn.staige.world
 
-## Status as of 15 Jul 2026
+## Status as of 16 Jul 2026 (payments-hardening pass)
 
 | Step | State |
 |---|---|
 | 1 · Supabase project `staige-learn` (`gqugktgogwaaykpivlrx`) | ✅ exists |
-| 2 · Migration `0001` + `0002` applied, 7 tables, RLS verified | ✅ **done** |
+| 2 · Migrations `0001`+`0002`+`0003` applied; 8 tables, RLS verified | ✅ **done** |
 | 3 · Auth Site URL + 3 redirect URLs | ✅ already correct |
 | 4 · Supabase keys collected | ⬜ **you** — I don't handle keys |
-| 5 · Stripe products + 6 prices | ⬜ **you** — sandbox still has 0 products |
+| 5 · Stripe products + 6 prices | ⬜ **you** — Stripe is LIVE + activated, **0 products** |
 | 6 · Stripe webhook endpoint + signing secret | ⬜ **you** |
 | 7 · Vercel env vars (**currently ZERO set**) | ⬜ **you** — blocks everything |
-| 8 · Test payment | ⬜ blocked on 4–7 |
-| Owner account `partha.adh@gmail.com` | ⬜ **you** — sign up, then run the script |
+| 8 · Test payment | ⬜ blocked on 4–7 (I can't set the secret env vars) |
+| Owner account `partha.adh@gmail.com` | ⬜ **you** — sign up, then run the grant script |
+
+**New in this pass (all committed):** migration `0003` (server-enforced `admins`
+role + `stripe_customer_id`/`stripe_product_id` on purchases) — **applied to the
+live DB**; a secure reconciliation endpoint `POST /api/verify-checkout`; shared
+`api/_lib/fulfillment.mjs` (one granter for webhook + reconcile); accurate Privacy
+& Terms; `VITE_CONTACT_EMAIL`. The webhook, checkout, price-authority and RLS were
+already production-grade and were reused, not rebuilt.
+
+> ⚠️ **`VITE_CONTACT_EMAIL`** is a new required **public** var (Contact page +
+> footer show "not published yet" until it's set). And the Stripe account is now
+> in **Live mode** — create products in **Test mode first** (below), verify, then
+> replicate in Live.
 
 > ### ⚠️ The live site is currently insecure
 > With no `VITE_SUPABASE_*` in Vercel, the deployed bundle has no Supabase client.

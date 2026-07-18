@@ -16,7 +16,7 @@
 //       tampered metadata cannot unlock a course nobody paid for.
 // ============================================================================
 import { stripe, supabaseAdmin } from './_lib/clients.mjs'
-import { productForPriceId } from './_lib/pricing.mjs'
+import { fulfillPaidSession } from './_lib/fulfillment.mjs'
 import { requireEnv } from './_lib/env.mjs'
 
 // Stripe signs the exact bytes it sent. Any reserialisation — which is what
@@ -76,9 +76,11 @@ export default async function handler(req, res) {
   try {
     switch (event.type) {
       case 'checkout.session.completed':
-      case 'checkout.session.async_payment_succeeded':
-        await handleCheckoutPaid(db, event.data.object)
+      case 'checkout.session.async_payment_succeeded': {
+        const result = await fulfillPaidSession(db, event.data.object)
+        if (result.granted) console.log(`[webhook] granted ${result.courseSlug} (session ${event.data.object.id})`)
         break
+      }
 
       case 'checkout.session.async_payment_failed':
         await markFailed(db, { sessionId: event.data.object.id })
@@ -114,89 +116,6 @@ export default async function handler(req, res) {
     // intended trade: never grant access twice, never grant it by accident.
     return res.status(500).json({ error: 'Handler failed' })
   }
-}
-
-// ── Payment succeeded ───────────────────────────────────────────────────────
-async function handleCheckoutPaid(db, session) {
-  if (session.payment_status !== 'paid') {
-    // e.g. a delayed payment method still processing. The async_payment_succeeded
-    // event will arrive later; record the intent and wait for it.
-    await recordPurchase(db, session, { status: 'pending' })
-    return
-  }
-
-  // What did they ACTUALLY pay for? Ask Stripe, not the request body.
-  const items = await stripe().checkout.sessions.listLineItems(session.id, { limit: 5 })
-  const priceId = items.data[0]?.price?.id
-  if (!priceId) throw new Error(`Session ${session.id} has no line item price`)
-
-  const approved = productForPriceId(priceId)
-  if (!approved) {
-    // A Price we do not sell. Record the payment so it isn't invisible, but grant
-    // nothing — this is exactly the case where blind trust would be the bug.
-    await recordPurchase(db, session, { status: 'paid', priceId })
-    throw new Error(`Price ${priceId} is not an approved price — access NOT granted for session ${session.id}`)
-  }
-
-  // The course is derived from the paid Price. Metadata is never consulted here.
-  const { data: course, error: courseErr } = await db
-    .from('courses').select('id, slug').eq('slug', approved.product.courseSlug).maybeSingle()
-  if (courseErr) throw courseErr
-  if (!course) throw new Error(`No course row for slug ${approved.product.courseSlug}`)
-
-  const userId = session.metadata?.supabase_user_id || session.client_reference_id
-  if (!userId) throw new Error(`Session ${session.id} has no supabase user id`)
-
-  const purchase = await recordPurchase(db, session, {
-    status: 'paid',
-    priceId,
-    courseId: course.id,
-    productKey: approved.product.key,
-    userId,
-  })
-
-  // The entitlement. `revoked_at: null` un-revokes a previously refunded course
-  // if the same learner buys it again.
-  const { error: accessErr } = await db.from('course_access').upsert(
-    {
-      user_id: userId,
-      course_id: course.id,
-      source: 'purchase',
-      purchase_id: purchase?.id || null,
-      granted_at: new Date().toISOString(),
-      revoked_at: null,
-    },
-    { onConflict: 'user_id,course_id' }
-  )
-  if (accessErr) throw accessErr
-
-  console.log(`[webhook] granted ${course.slug} to ${userId} (session ${session.id})`)
-}
-
-// Upsert on the session id so a retry updates the same row instead of duplicating.
-async function recordPurchase(db, session, { status, priceId, courseId, productKey, userId }) {
-  const uid = userId || session.metadata?.supabase_user_id || session.client_reference_id
-  const cid = courseId || session.metadata?.course_id
-  if (!uid || !cid) return null
-
-  const { data, error } = await db.from('purchases').upsert(
-    {
-      user_id: uid,
-      course_id: cid,
-      product_key: productKey || session.metadata?.product_key || null,
-      stripe_checkout_session_id: session.id,
-      stripe_payment_intent_id:
-        typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id || null,
-      stripe_price_id: priceId || null,
-      amount_paid_cents: session.amount_total ?? null,
-      currency: session.currency || 'usd',
-      status,
-    },
-    { onConflict: 'stripe_checkout_session_id' }
-  ).select('id').maybeSingle()
-
-  if (error) throw error
-  return data
 }
 
 async function markFailed(db, { sessionId, paymentIntentId }) {

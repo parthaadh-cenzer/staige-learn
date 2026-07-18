@@ -45,11 +45,19 @@ begin
         granted_at = coalesce(public.course_access.granted_at, now());
 
   get diagnostics v_granted = row_count;
-  raise notice 'Granted/refreshed % owner entitlements for % (user_id %)', v_granted, 'partha.adh@gmail.com', v_user_id;
+
+  -- Server-enforced admin role (migration 0003), separate from course access.
+  -- A user cannot write this table from the browser; only this service-role
+  -- script (or another server path) can. Idempotent.
+  insert into public.admins (user_id, note)
+  values (v_user_id, 'owner')
+  on conflict (user_id) do nothing;
+
+  raise notice 'Granted/refreshed % owner entitlements + admin role for % (user_id %)', v_granted, 'partha.adh@gmail.com', v_user_id;
 end $$;
 
 -- Verify. Expect exactly 3 rows, all source=owner_access, purchase_id null,
--- revoked_at null — and no purchases row for this user.
+-- revoked_at null, is_admin = true — and no purchases row for this user.
 select
   u.email,
   c.slug,
@@ -57,6 +65,7 @@ select
   ca.purchase_id,
   ca.granted_at,
   ca.revoked_at,
+  exists (select 1 from public.admins a where a.user_id = u.id) as is_admin,
   (select count(*) from public.purchases p where p.user_id = u.id) as purchase_rows_should_be_zero
 from public.course_access ca
 join auth.users u    on u.id = ca.user_id

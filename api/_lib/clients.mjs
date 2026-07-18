@@ -42,3 +42,23 @@ export async function userFromAuthHeader(req) {
   if (error || !data?.user) return null
   return data.user
 }
+
+// Server-enforced admin check. Reads the `admins` table with the service-role
+// key — a table the browser can only READ its own row of and can never write
+// (see migration 0003). Admin authority therefore lives in the database, not in
+// client state, an email string, or a hidden UI element.
+export async function isAdminUser(userId) {
+  if (!userId) return false
+  const { data } = await supabaseAdmin()
+    .from('admins').select('user_id').eq('user_id', userId).maybeSingle()
+  return Boolean(data)
+}
+
+// Guard for future admin-only endpoints: returns the authenticated admin user,
+// or null. An endpoint calls this and 403s on null — no admin route exists yet,
+// but every one that does must gate on the database, and this is how.
+export async function requireAdmin(req) {
+  const user = await userFromAuthHeader(req)
+  if (!user) return null
+  return (await isAdminUser(user.id)) ? user : null
+}

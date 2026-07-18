@@ -84,6 +84,12 @@ function baseFaq(course) {
       q: 'Can I download the templates?',
       a: 'Yes. Every template and resource is a real Word, PDF or Excel file you download and keep — not a screenshot.',
     },
+    {
+      // Kept consistent in meaning with Terms (REFUND_POLICY) and the checkout
+      // copy — one-time purchase, generally final, we'll fix genuine problems.
+      q: 'Can I get a refund?',
+      a: `It's a one-time payment, and each Operating System unlocks only itself — no subscription, and buying one doesn't unlock the others. Because access is immediate and includes downloads, purchases are generally final; if something goes wrong, contact us and we'll put it right.`,
+    },
   ]
 }
 
