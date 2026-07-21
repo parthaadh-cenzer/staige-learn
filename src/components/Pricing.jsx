@@ -109,7 +109,11 @@ export function BuyButton({ course, className = '', label, signedOutLabel = 'Sig
       }
       window.location.href = data.url
     } catch (err) {
-      setError(err.message)
+      // Show the friendly message, plus a short reference (code / request id)
+      // that maps to a Vercel log line — useful in a support email, never a
+      // secret. e.g. "…try again. (server_misconfigured · a1b2c3)".
+      const ref = [err.code, err.requestId].filter(Boolean).join(' · ')
+      setError(ref ? `${err.message} (${ref})` : err.message)
       setBusy(false)
     }
   }

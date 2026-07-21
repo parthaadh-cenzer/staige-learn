@@ -12,8 +12,12 @@
 import { stripe, supabaseAdmin, userFromAuthHeader } from './_lib/clients.mjs'
 import { resolveActivePrice } from './_lib/pricing.mjs'
 import { appUrl } from './_lib/env.mjs'
+import { productByKey } from '../shared/catalog.mjs'
 
 const json = (res, status, body) => res.status(status).json(body)
+
+// A short, non-secret id to correlate a browser error with a Vercel log line.
+const reqId = () => Math.random().toString(36).slice(2, 8)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -21,24 +25,29 @@ export default async function handler(req, res) {
     return json(res, 405, { error: 'Method not allowed' })
   }
 
+  const rid = reqId()
   try {
-    // ── Who is asking? Only a valid Supabase JWT answers this. ──────────────
-    const user = await userFromAuthHeader(req)
-    if (!user) return json(res, 401, { error: 'You need to be signed in to buy a course.' })
-
     // ── What are they asking for? A key from our own list, or nothing. ──────
+    // Validated against the catalog BEFORE any network call, so a bad key is a
+    // clean 400 and never reaches Stripe/Supabase.
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {}
     const productKey = typeof body.productKey === 'string' ? body.productKey : null
-    if (!productKey) return json(res, 400, { error: 'Missing productKey.' })
-
-    let product, tier, priceId
-    try {
-      ;({ product, tier, priceId } = resolveActivePrice(productKey))
-    } catch {
-      // Unknown key, or the Price ID for this product isn't configured yet. Both
-      // are our problem, not something to explain to the buyer in detail.
-      return json(res, 400, { error: 'That course is not available for purchase right now.' })
+    if (!productKey) return json(res, 400, { error: 'Missing productKey.', code: 'missing_product_key' })
+    if (!productByKey(productKey)) {
+      console.warn(`[checkout ${rid}] unknown product key: ${productKey}`)
+      return json(res, 400, { error: 'That course is not available for purchase right now.', code: 'unknown_product' })
     }
+
+    // ── Who is asking? Only a valid Supabase JWT answers this. This is the
+    //    first line that needs the server's Supabase env vars — a 500 here is
+    //    almost always a missing SUPABASE_* var, now surfaced explicitly below.
+    const user = await userFromAuthHeader(req)
+    if (!user) return json(res, 401, { error: 'You need to be signed in to buy a course.', code: 'not_authenticated' })
+
+    // Resolve the Stripe Price server-side. A missing price env throws
+    // MissingEnvError, caught by the outer handler and reported as a server
+    // misconfiguration (not a vague 400), so the real cause reaches the logs.
+    const { product, tier, priceId } = resolveActivePrice(productKey)
 
     const db = supabaseAdmin()
 
@@ -110,8 +119,38 @@ export default async function handler(req, res) {
 
     return json(res, 200, { url: session.url })
   } catch (err) {
-    // Never leak Stripe/Postgres internals to the browser.
-    console.error('[checkout] failed:', err)
-    return json(res, 500, { error: 'We could not start checkout. Please try again.' })
+    // Categorise so the REAL cause lands in the Vercel logs (never a secret
+    // value) and the browser gets a safe message + a stable code + the request
+    // id, so a support report can be tied to one log line.
+
+    // Missing env var → server misconfiguration. Log the NAME, not the value.
+    if (err?.code === 'ENV_MISSING') {
+      console.error(`[checkout ${rid}] MISCONFIGURED — missing env var: ${err.envVar}`)
+      return json(res, 503, {
+        error: 'Checkout isn’t available right now. Please try again shortly.',
+        code: 'server_misconfigured',
+        requestId: rid,
+      })
+    }
+
+    // Stripe rejected the request (e.g. a Price ID from the wrong mode/account,
+    // or a bad key). err.type is like 'StripeInvalidRequestError'.
+    if (typeof err?.type === 'string' && err.type.startsWith('Stripe')) {
+      console.error(`[checkout ${rid}] Stripe error: ${err.type} — ${err.code || ''} ${err.message}`)
+      return json(res, 502, {
+        error: 'Our payment provider rejected the request. Please try again shortly.',
+        code: 'payment_provider_error',
+        requestId: rid,
+      })
+    }
+
+    // Anything else. Log the message (Stripe/Supabase client errors don't put
+    // secrets in messages) but never the full object with headers.
+    console.error(`[checkout ${rid}] failed: ${err?.message || err}`)
+    return json(res, 500, {
+      error: 'We could not start checkout. Please try again.',
+      code: 'checkout_failed',
+      requestId: rid,
+    })
   }
 }

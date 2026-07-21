@@ -1,7 +1,7 @@
 // Stripe + Supabase server clients. Server-only — see _lib/env.mjs.
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
-import { requireEnv } from './env.mjs'
+import { requireEnv, supabaseUrl } from './env.mjs'
 
 let _stripe
 export function stripe() {
@@ -23,7 +23,9 @@ export function stripe() {
 let _admin
 export function supabaseAdmin() {
   if (!_admin) {
-    _admin = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_SERVICE_ROLE_KEY'), {
+    // URL accepts the public VITE_ twin (see env.mjs#supabaseUrl); the
+    // service-role key is a secret and is required under its own name only.
+    _admin = createClient(supabaseUrl(), requireEnv('SUPABASE_SERVICE_ROLE_KEY'), {
       auth: { persistSession: false, autoRefreshToken: false },
     })
   }

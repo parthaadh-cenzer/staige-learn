@@ -56,6 +56,15 @@ export async function apiPost(path, body) {
     body: JSON.stringify(body || {}),
   })
   const data = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.')
+  if (!res.ok) {
+    // Carry the server's safe error code + request id so the UI can show a
+    // useful hint and a support report can be tied to a Vercel log line. These
+    // are non-secret by construction (see api/checkout.mjs).
+    const err = new Error(data.error || 'Something went wrong. Please try again.')
+    err.code = data.code || null
+    err.requestId = data.requestId || null
+    err.status = res.status
+    throw err
+  }
   return data
 }
