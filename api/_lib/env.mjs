@@ -48,6 +48,22 @@ export function presentEnv(names) {
 // The only host we will ever hand to Stripe as a redirect target. Taking this
 // from configuration rather than from the request means a forged Host header
 // can't turn our Checkout Session into an open redirect.
+//
+// APP_URL is preferred. If it's unset, we fall back to Vercel's OWN environment
+// variables — VERCEL_PROJECT_PRODUCTION_URL (the project's production domain) or
+// VERCEL_URL (this deployment's URL). These come from the platform, never from
+// the request, so the open-redirect guarantee holds; they just spare us a hard
+// failure when APP_URL is forgotten. Set APP_URL for the canonical domain.
 export function appUrl() {
-  return requireEnv('APP_URL').replace(/\/+$/, '')
+  const explicit = process.env.APP_URL
+  if (explicit) return explicit.replace(/\/+$/, '')
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL
+  if (vercel) return `https://${vercel.replace(/\/+$/, '')}`
+  throw new MissingEnvError('APP_URL')
 }
+
+// True when appUrl() can resolve a redirect base — APP_URL or a Vercel-provided
+// production/deployment domain. Used by the health probe so a missing APP_URL
+// that's covered by the Vercel fallback doesn't read as a hard failure.
+export const hasAppUrl = () =>
+  Boolean(process.env.APP_URL || process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL)

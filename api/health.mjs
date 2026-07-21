@@ -13,12 +13,12 @@
 //  this endpoint once launch is settled if you'd rather not expose the shape of
 //  your configuration.
 // ============================================================================
-import { presentEnv } from './_lib/env.mjs'
+import { presentEnv, hasAppUrl } from './_lib/env.mjs'
 import { stripe } from './_lib/clients.mjs'
 import { PRODUCTS } from '../shared/catalog.mjs'
 
-// The vars the paid flow needs. SUPABASE_URL is handled specially (its public
-// VITE_ twin counts), so it isn't in this plain list.
+// The vars the paid flow needs. SUPABASE_URL and APP_URL are handled specially
+// below (each accepts a fallback), so they aren't in this plain list.
 const REQUIRED = [
   'STRIPE_SECRET_KEY',
   'STRIPE_WEBHOOK_SECRET',
@@ -28,7 +28,6 @@ const REQUIRED = [
   'STRIPE_PRICE_MARKETING_REGULAR',
   'STRIPE_PRICE_SIDE_HUSTLE_INTRO',
   'STRIPE_PRICE_SIDE_HUSTLE_REGULAR',
-  'APP_URL',
   'SUPABASE_SERVICE_ROLE_KEY',
 ]
 
@@ -36,8 +35,15 @@ export default async function handler(req, res) {
   const env = presentEnv(REQUIRED)
   // The URL is public and accepted under either name.
   env.SUPABASE_URL = Boolean(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL)
+  // APP_URL resolves via the Vercel-provided production domain if unset. Also
+  // report whether APP_URL itself is set explicitly, for transparency.
+  env.APP_URL = hasAppUrl()
+  env.APP_URL_explicit = Boolean(process.env.APP_URL)
 
-  const missing = Object.entries(env).filter(([, present]) => !present).map(([name]) => name)
+  // Keys ending in _explicit are informational, not requirements.
+  const missing = Object.entries(env)
+    .filter(([name, present]) => !present && !name.endsWith('_explicit'))
+    .map(([name]) => name)
   const out = { ok: missing.length === 0, missing, env, checkedAt: new Date().toISOString() }
 
   // Deep check: prove the Price IDs are valid for THIS key (i.e. same account
