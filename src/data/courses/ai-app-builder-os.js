@@ -80,30 +80,86 @@ const course = {
       { icon: 'FolderX', title: 'Nothing to show', text: 'You understand the ideas but have no live projects — so no client, and no employer, can tell.' },
       { icon: 'Wand2', title: 'AI builds something generic', text: 'You click Generate and get a page that looks like everyone else’s. Nobody taught you what to ask for.' },
     ],
+    outcome: {
+      title: 'From “I can’t code” to a portfolio of things you launched.',
+      text: 'You start with an idea and finish with live URLs — websites, working web apps, AI-powered tools and a capstone product, all publicly deployed and all yours. No traditional coding experience required; your job is to think clearly and direct the build, and the course teaches you exactly how.',
+    },
+    // Every project the course actually produces, in the order you build them.
     builds: [
-      'A published personal portfolio website',
-      'A complete client business website',
-      'A productivity app people actually use',
-      'An AI resume builder and an AI study assistant',
-      'A capstone product you planned, launched and presented',
+      'Personal portfolio website',
+      'Business landing page',
+      'Productivity app',
+      'Habit tracker',
+      'Expense tracker',
+      'AI resume builder',
+      'AI study assistant',
+      'Mini SaaS dashboard',
+      'Capstone project',
+      'A public portfolio of everything above',
     ],
+    journey: [
+      { emoji: '👋', title: 'Welcome', text: 'The builder mindset, your toolkit, and why you no longer start by learning to code.' },
+      { emoji: '🚀', title: 'Modules 1–7', text: 'First launch, design, client websites, real apps, AI features, polish and launch — each ending in a shipped project.' },
+      { emoji: '🎯', title: 'Builder Missions', text: 'Every module closes with a mission you complete, not a video you finish. That is what produces the portfolio.' },
+      { emoji: '🥊', title: 'Boss Battle', text: 'One sentence, no brief, no walkthrough. You define, design, build and launch it yourself.' },
+      { emoji: '🏆', title: 'Module 8 — Capstone', text: 'Plan, build, launch and present a complete product of your own choosing.' },
+      { emoji: '🎓', title: 'Graduation', text: 'The final dashboard, the graduation checklist and the kit you keep using afterwards.' },
+    ],
+    vault: {
+      title: 'The Builder Vault',
+      blurb: 'Nine premium libraries included with the course — the references and audit tools you will reach for on every project you build afterwards, not just the ones inside it.',
+      items: [
+        { name: 'Builder Recipes', count: '95 recipes', note: 'Complete, copy-and-paste build prompts across five collections.' },
+        { name: 'Landing Page Templates', count: '20 planned', note: 'Full standard, setup and customisation guides, plus the generation prompt.' },
+        { name: 'Websites to Study', count: '50 sites', note: 'What specifically to look at on each, and why.' },
+        { name: 'Color Palette Library', count: '20 palettes', note: 'Five swatches each, copyable HEX, with a Best For label.' },
+        { name: 'Font Pairing Library', count: '15 pairings', note: 'Live previews and a one-click Google Fonts import.' },
+        { name: 'App Idea Generator', count: '90 ideas', note: 'Filter by category, difficulty and monetisation.' },
+        { name: 'Launch Checklist', count: '58 checks', note: 'Nine sections, ticks saved to your account.' },
+        { name: 'UI/UX Checklist', count: '67 checks', note: 'Eleven sections, including the Premium Design Test.' },
+        { name: 'Resource Vault', count: '72 tools', note: 'Official links across 16 categories. Nothing redistributed.' },
+      ],
+      // The line that keeps this section honest.
+      footnote: 'Template library and guided build resources. The landing-page template ZIPs are published and verified one at a time — the Templates page states plainly which files are ready, and no download button appears without a file behind it. Everything else listed above works in the browser today.',
+    },
+    // The Builder Vault has its own section above, so these are the OTHER
+    // things included. Without them the derived list is a single lonely
+    // "Achievements" card, because this course ships no downloadable files.
     resources: [
-      { icon: 'Vault', title: 'Builder Vault', text: '95 build recipes, 20 palettes, 15 font pairings, 90 app ideas, 50 sites to study, two audit checklists and 72 tools.' },
+      { icon: 'Target', title: 'Builder Missions', text: 'Eight missions that each end in a real, deployed project — the thing that actually becomes your portfolio.' },
+      { icon: 'PencilLine', title: 'Saved planning canvases', text: 'The Builder Canvas, discovery questions and founder questions save to your account as you fill them in.' },
+      { icon: 'RefreshCw', title: 'Free updates', text: 'AI builders change fast. When a resource or template lands, it appears in your account — nothing to re-buy.' },
+    ],
+    how: [
+      'Learn one concept',
+      'Follow a guided build',
+      'Complete the Builder Mission',
+      'Improve the project',
+      'Launch it publicly',
+      'Add it to your portfolio',
     ],
     audience: {
-      yes: ['Complete beginners with no coding background', 'Students building a portfolio', 'Freelancers who want to sell websites', 'Founders who need a working prototype', 'Anyone with an idea and no way to build it'],
+      yes: [
+        'Complete beginners with no coding background',
+        'Students building a portfolio',
+        'Freelancers who want to sell websites',
+        'Marketers who need pages built without waiting on a developer',
+        'Creators turning an audience into a product',
+        'Small-business owners building their own site',
+        'Aspiring founders who need a working prototype',
+        'Anyone with an app idea and limited coding experience',
+      ],
       no: ['You want to become a software engineer', 'You won’t actually build the projects', 'You expect AI to decide what to build for you'],
     },
     faq: [
-      { q: 'Do I need to know how to code?', a: 'No. That’s the point. You’ll use AI builders to generate the code, and your job is to think clearly, make product decisions and guide the build. If you can describe what you want precisely, you can finish this course.' },
-      { q: 'Which AI builder does it use?', a: 'Claude for planning and debugging, plus an AI app builder of your choice — Lovable, Bolt, Replit and Cursor all work. Module 2 is explicit that tools change and the workflow doesn’t, so nothing here breaks when a new builder appears.' },
-      { q: 'Do I get the landing page templates?', a: 'The Template Library is published one template at a time, and every entry says honestly whether its file is available yet. Nothing on that page is a download button with nothing behind it. The course is complete and fully usable without them.' },
-      { q: 'Will I have anything to show at the end?', a: 'Yes — that’s the whole design. Every module ends with a Builder Mission that produces a real, deployed project. By graduation you have a portfolio of live URLs, not a certificate.' },
-      // Overrides the platform's generic "yes, everything downloads" answer,
-      // which isn't true for this course — its resources are live libraries you
-      // use in the browser, not files. Saying so here is better than being
-      // corrected by the Download Center after someone has paid.
-      { q: 'Can I download the templates?', a: 'This course’s resources are living libraries rather than files: the 95 Builder Recipes, the palettes, the font pairings, the app ideas and the two audit checklists all work in the browser, with copy buttons where you need the text. The downloadable landing-page template ZIPs are being published one at a time, and every card states plainly whether its file is ready — you will never find a download button here with nothing behind it.' },
+      { q: 'Do I need coding experience?', a: 'No. That’s the point. You’ll use AI builders to generate the code, and your job is to think clearly, make product decisions and guide the build. If you can describe what you want precisely, you can finish this course.' },
+      { q: 'Which tools will I use?', a: 'Claude for planning, architecture and debugging, plus an AI app builder of your choice — Lovable, Bolt, Replit and Cursor all work — with Vercel for publishing and GitHub optionally for saving projects. Module 1 Lesson 2 is explicit that tools change and the workflow doesn’t, so nothing here breaks when a new builder appears.' },
+      { q: 'Is this a subscription?', a: 'No. It’s a single one-time payment for this Operating System, and it stays on your account. Buying one OS does not unlock the others, and there is nothing recurring to cancel.' },
+      { q: 'What is included in Builder Vault?', a: 'Nine libraries: 95 Builder Recipes, the landing-page template library, 50 websites to study, 20 colour palettes, 15 font pairings, 90 app ideas, the Launch Checklist (58 checks), the UI/UX Checklist (67 checks) and a Resource Vault of 72 official tools. It stays available after you finish the course.' },
+      { q: 'Are all template ZIPs currently downloadable?', a: 'No — and the course says so on the page itself rather than in the small print. The landing-page templates are built, tested and packaged one at a time; the Templates page shows exactly which files are ready and which are still on the roadmap, and never renders a download button without a file behind it. What is available today is the full technical standard, the setup and customisation guides, and the exact prompt used to generate them, so you can build any of them yourself in the meantime.' },
+      { q: 'Will my progress be saved?', a: 'Yes. Completed lessons, XP, worksheet answers and checklist ticks save to your account and sync across devices when you’re signed in. Progress is only ever added — nothing in the sync can reduce what you’ve completed.' },
+      { q: 'Can I access it on mobile?', a: 'Yes. Every page — lessons, the Builder Vault, the checklists, the recipe prompts — is built to work at phone, tablet and desktop widths. You’ll want a laptop for the actual building, but the course reads fine on a phone.' },
+      { q: 'What happens after purchase?', a: 'Access is immediate. Checkout returns you to the course, the entitlement is written by our payment webhook once Stripe confirms the payment, and AI App Builder OS appears in your account straight away — including the full Builder Vault.' },
       { q: 'Do I get a certificate?', a: 'No. STAIGE doesn’t issue certificates, and this course deliberately doesn’t pretend to — the Graduation Kit lists the certificate as unavailable rather than generating a credential that means nothing. What you finish with is a set of deployed products with your name on them, which is what a client or an employer actually looks at.' },
     ],
     finalCta: {

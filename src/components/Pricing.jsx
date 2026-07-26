@@ -10,11 +10,12 @@
 // ============================================================================
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Lock, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Lock, Loader2, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react'
 import { priceView } from '../../shared/catalog.mjs'
 import { useAuth } from '../auth/AuthProvider'
 import { apiPost } from '../lib/supabase'
 import { ACCESS } from '../course/access'
+import { osPath } from '../data/courses'
 
 const fmtDate = (iso) =>
   new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -180,8 +181,12 @@ export function CoursePurchasePanel({ course }) {
  * The locked state. Shown in place of gated content — never as a modal over
  * readable text, and never with the content merely hidden behind it.
  */
-export function CourseLock({ course, reason, what = 'This part of the course' }) {
+// `anchor` deep-links the "see what's included" link at the specific section of
+// the sales page this lock is standing in front of — the Builder Vault lock
+// sends you to the Builder Vault section, not just the top of the page.
+export function CourseLock({ course, reason, what = 'This part of the course', anchor }) {
   const view = priceView(course?.product)
+  const details = `${osPath(course)}${anchor ? `#${anchor}` : ''}`
 
   return (
     <div className="card mx-auto max-w-lg p-8 text-center">
@@ -217,7 +222,16 @@ export function CourseLock({ course, reason, what = 'This part of the course' })
         </>
       )}
 
-      <p className="mt-5 text-xs text-faint">
+      {/* The way out that isn't "buy" or "sign in": go and read what this
+          actually contains. Without it a lock screen is a dead end. */}
+      <Link
+        to={details}
+        className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 hover:underline"
+      >
+        View everything included <ArrowRight className="h-3.5 w-3.5" />
+      </Link>
+
+      <p className="mt-4 text-xs text-faint">
         Your progress is saved to your account and syncs across your devices.
       </p>
     </div>

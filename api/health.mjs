@@ -28,6 +28,11 @@ const REQUIRED = [
   'STRIPE_PRICE_MARKETING_REGULAR',
   'STRIPE_PRICE_SIDE_HUSTLE_INTRO',
   'STRIPE_PRICE_SIDE_HUSTLE_REGULAR',
+  // AI App Builder OS. Listed here deliberately: until these are set, this
+  // probe reports ok:false, which is the truth — that course cannot be
+  // purchased. Every other course keeps selling regardless.
+  'STRIPE_PRICE_APP_BUILDER_INTRO',
+  'STRIPE_PRICE_APP_BUILDER_REGULAR',
   'SUPABASE_SERVICE_ROLE_KEY',
 ]
 

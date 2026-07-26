@@ -127,6 +127,19 @@ export const getCourseByOsParam = (param) => {
   return getCourseBySlug(p) || courses.find((c) => osShortSlug(c.slug) === p)
 }
 
+// ── Where a DISCOVERY link should go ────────────────────────────────────────
+// One rule, asked by every browsing surface (homepage goal cards, the /courses
+// catalog, search results). Someone who doesn't own a paid course belongs on
+// its sales page, where the pitch and the price are — not dropped into the
+// course dashboard, which is an owner's workspace and reads as a paywall to
+// everyone else.
+//
+// Owners, and anyone browsing a free/unlaunched course, go straight in.
+// Post-purchase surfaces (Profile, Settings, the course switcher, checkout
+// success) link with courseBase() directly and are deliberately unaffected.
+export const courseDestination = (course, owned) =>
+  owned || !course.requiresPurchase ? courseBase(course.slug) : osPath(course)
+
 // ── Homepage selectors ──────────────────────────────────────────────────────
 // Every one of these is derived. The homepage never names a course.
 

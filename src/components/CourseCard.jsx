@@ -16,7 +16,7 @@ import { useStore } from '../store/useStore'
 import { useAuth } from '../auth/AuthProvider'
 import { priceView } from '../../shared/catalog.mjs'
 import { courseCta } from '../course/progress'
-import { courseBase } from '../data/courses'
+import { courseDestination } from '../data/courses'
 import { ProgressBar } from './ui'
 import CourseArt from './CourseArt'
 import { tone as toneOf } from '../lib/tones'
@@ -149,9 +149,10 @@ export default function CourseCard({ course, size = 'card', className = '' }) {
     )
   }
 
+  // Discovery card → the sales page unless they own it. See courseDestination().
   return (
     <Link
-      to={courseBase(course.slug)}
+      to={courseDestination(course, owned)}
       className={`${shell} card-hover border ${t.border} focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40`}
     >
       {body}

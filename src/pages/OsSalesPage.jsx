@@ -102,6 +102,108 @@ function Hero({ course, view }) {
   )
 }
 
+// ── 1b · Headline numbers ───────────────────────────────────────────────────
+// Derived from the curriculum (course/sales.js), so these can never overstate
+// what the course contains.
+function Stats({ view }) {
+  if (!view.stats.length) return null
+  return (
+    <Reveal>
+      <dl className="mx-auto grid max-w-2xl grid-cols-3 gap-4 text-center">
+        {view.stats.map((s) => (
+          <div key={s.label} className="card p-5">
+            <dt className="sr-only">{s.label}</dt>
+            <dd>
+              <span className="block font-display text-3xl font-extrabold text-brand-600">{s.value}</span>
+              <span className="mt-0.5 block text-xs font-semibold uppercase tracking-wider text-faint">{s.label}</span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </Reveal>
+  )
+}
+
+// ── 1c · The primary outcome ────────────────────────────────────────────────
+// One claim, stated plainly, before any feature list.
+function Outcome({ view }) {
+  if (!view.outcome) return null
+  return (
+    <Reveal>
+      <section aria-labelledby="outcome-title" className="mx-auto max-w-3xl text-center">
+        <h2 id="outcome-title" className="font-display text-3xl font-extrabold leading-tight text-ink-900">
+          {view.outcome.title}
+        </h2>
+        <p className="mt-4 text-lg leading-relaxed text-muted">{view.outcome.text}</p>
+      </section>
+    </Reveal>
+  )
+}
+
+// ── 3b · The course journey ─────────────────────────────────────────────────
+function Journey({ view }) {
+  if (!view.journey.length) return null
+  return (
+    <Reveal>
+      <section aria-labelledby="journey-title">
+        <h2 id="journey-title" className="text-center font-display text-3xl font-extrabold text-ink-900">
+          The journey
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-center text-muted">
+          Every stage ends with something you have actually built.
+        </p>
+        <ol className="mx-auto mt-8 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {view.journey.map((j, i) => (
+            <li key={j.title} className="card flex items-start gap-3 p-5">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-sage-50 text-base" aria-hidden="true">
+                {j.emoji}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-faint">Stage {i + 1}</span>
+                <span className="block font-display font-bold text-ink-900">{j.title}</span>
+                <span className="mt-0.5 block text-sm leading-relaxed text-muted">{j.text}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </Reveal>
+  )
+}
+
+// ── 5b · A bundled premium library ──────────────────────────────────────────
+// Gets its own anchor so the locked-vault screen can deep-link straight to
+// "here is everything that's actually in it".
+function VaultPromo({ view }) {
+  const v = view.vault
+  if (!v) return null
+  return (
+    <Reveal>
+      <section id="builder-vault" aria-labelledby="vault-title" className="card scroll-mt-24 border-gold-100 bg-gold-50/40 p-6 sm:p-10">
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="pill border-gold-100 text-gold-500">Included, not an upsell</span>
+          <h2 id="vault-title" className="mt-4 font-display text-3xl font-extrabold text-ink-900">{v.title}</h2>
+          <p className="mx-auto mt-3 max-w-xl leading-relaxed text-muted">{v.blurb}</p>
+        </div>
+        <ul className="mx-auto mt-8 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {v.items.map((it) => (
+            <li key={it.name} className="rounded-2xl border border-gold-100 bg-card p-4">
+              <p className="font-display text-sm font-bold text-ink-900">{it.name}</p>
+              <p className="mt-0.5 text-xs font-semibold text-gold-500">{it.count}</p>
+              {it.note && <p className="mt-1 text-xs leading-relaxed text-muted">{it.note}</p>}
+            </li>
+          ))}
+        </ul>
+        {/* The honesty line. Anything not yet downloadable is named here rather
+            than implied to be ready by the list above. */}
+        {v.footnote && (
+          <p className="mx-auto mt-6 max-w-2xl text-center text-xs leading-relaxed text-muted">{v.footnote}</p>
+        )}
+      </section>
+    </Reveal>
+  )
+}
+
 // ── 2 · Is this your problem? ───────────────────────────────────────────────
 function Problems({ view }) {
   if (!view.problems.length) return null
@@ -292,14 +394,17 @@ function Audience({ view }) {
 }
 
 // ── 8 · How It Works ────────────────────────────────────────────────────────
-const STEPS = ['Choose your OS', 'Complete guided missions', 'Download your resources', 'Use it in real life']
-function HowItWorks() {
+// Steps come from the view so a course whose learning model differs (build and
+// launch, rather than download and use) can describe its own.
+const HOW_COLS = { 3: 'sm:grid-cols-3', 4: 'sm:grid-cols-4', 5: 'sm:grid-cols-3 lg:grid-cols-5', 6: 'sm:grid-cols-3' }
+function HowItWorks({ view }) {
+  const steps = view.how
   return (
     <Reveal>
       <section aria-labelledby="how-title">
         <h2 id="how-title" className="text-center font-display text-3xl font-extrabold text-ink-900">How it works</h2>
-        <ol className="mx-auto mt-8 grid max-w-4xl gap-4 sm:grid-cols-4">
-          {STEPS.map((s, i) => (
+        <ol className={`mx-auto mt-8 grid max-w-4xl gap-4 ${HOW_COLS[steps.length] || 'sm:grid-cols-4'}`}>
+          {steps.map((s, i) => (
             <li key={s} className="card p-5 text-center">
               <span className="mx-auto grid h-9 w-9 place-items-center rounded-full bg-brand-600 font-display text-sm font-extrabold text-white">
                 {i + 1}
@@ -390,13 +495,17 @@ export default function OsSalesPage() {
   return (
     <div className="space-y-16 lg:space-y-20">
       <Hero course={course} view={view} />
+      <Stats view={view} />
+      <Outcome view={view} />
       <Problems view={view} />
       <Builds course={course} view={view} />
+      <Journey view={view} />
       <InsideModules view={view} />
+      <VaultPromo view={view} />
       <Resources view={view} />
       <MeetCapyByte />
       <Audience view={view} />
-      <HowItWorks />
+      <HowItWorks view={view} />
       <PricingSection course={course} />
       <Faq view={view} />
       <FinalCta course={course} view={view} />

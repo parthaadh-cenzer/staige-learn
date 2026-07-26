@@ -16,7 +16,7 @@ import {
   ArrowRight, BookOpen, Signal, Lock, Hammer, Rocket, CheckCircle2, XCircle,
   Library, Bot, Download, ListChecks, LayoutDashboard, Workflow, Flag, CloudUpload,
 } from 'lucide-react'
-import { activeCourses, goalCourses, homeGroups, courseBase, osPath } from '../data/courses'
+import { activeCourses, goalCourses, homeGroups, courseBase, courseDestination, osPath } from '../data/courses'
 import { useAuth } from '../auth/AuthProvider'
 import { PriceTag, PriceNote, BuyButton } from '../components/Pricing'
 import HeroStory, { STORIES } from '../components/HeroStory'
@@ -113,6 +113,7 @@ const GOAL_COLS = {
 }
 
 function ChooseYourGoal() {
+  const { ownsCourse } = useAuth()
   return (
     <Reveal>
       <section aria-labelledby="goal-title">
@@ -141,9 +142,11 @@ function ChooseYourGoal() {
               </>
             )
             const shell = 'card flex h-full flex-col p-5'
+            // Discovery link: owners go into the course, everyone else meets the
+            // sales page first. See courseDestination() in the registry.
             return course.isActive ? (
               <Link
-                key={course.slug} to={courseBase(course.slug)}
+                key={course.slug} to={courseDestination(course, ownsCourse(course.slug))}
                 className={`${shell} card-hover border ${t.border} focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40`}
               >
                 {inner}

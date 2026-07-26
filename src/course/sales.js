@@ -21,8 +21,31 @@
 //     current three. See any of data/courses/ai-*.js for the shape.
 // ============================================================================
 import { priceView } from '../../shared/catalog.mjs'
+import { totalCourseXp } from './progress'
 
 const len = (x) => (Array.isArray(x) ? x.length : 0)
+
+// The default "how it works" steps. A course overrides them with `sales.how`
+// when its learning model is genuinely different — AI App Builder OS is
+// build-and-launch rather than download-and-use, so it supplies its own.
+const DEFAULT_STEPS = [
+  'Choose your OS',
+  'Complete guided missions',
+  'Download your resources',
+  'Use it in real life',
+]
+
+// The headline numbers, derived so they can never drift from the curriculum.
+// XP only appears for courses that actually award it.
+function courseStats(course) {
+  const out = [
+    { value: String(course.moduleCount), label: course.moduleCount === 1 ? 'module' : 'modules' },
+    { value: String(course.totalLessons), label: 'lessons' },
+  ]
+  const xp = course.features?.xp ? totalCourseXp(course) : 0
+  if (xp > 0) out.push({ value: xp.toLocaleString('en-US'), label: 'XP to earn' })
+  return out
+}
 
 // Resources are DERIVED from what the course actually ships, so the list is
 // always honest: a course with no downloads shows no "Downloads" card.
@@ -71,6 +94,12 @@ function derivedResources(course) {
 function baseFaq(course) {
   const price = priceView(course.product)
   const priceText = price?.display || 'one payment'
+  // Only ask "can I download the templates?" of a course that HAS downloadable
+  // files. Asking it of one whose resources are live in-browser libraries
+  // invites the generic "yes, real Word/PDF/Excel files" answer, which would be
+  // untrue — and a course shouldn't have to write an override just to avoid
+  // being misdescribed by a question it never raised.
+  const hasDownloads = (course.downloads?.items || []).some(isDownloadable)
   return [
     {
       q: 'How long does it take?',
@@ -88,10 +117,12 @@ function baseFaq(course) {
       q: 'Are updates included?',
       a: 'Yes. When tools or best practices change, the templates and prompts update in your account automatically. Nothing to re-buy.',
     },
-    {
-      q: 'Can I download the templates?',
-      a: 'Yes. Every template and resource is a real Word, PDF or Excel file you download and keep — not a screenshot.',
-    },
+    ...(hasDownloads
+      ? [{
+          q: 'Can I download the templates?',
+          a: 'Yes. Every template and resource is a real Word, PDF or Excel file you download and keep — not a screenshot.',
+        }]
+      : []),
     {
       // Kept consistent in meaning with Terms (REFUND_POLICY) and the checkout
       // copy — one-time purchase, generally final, we'll fix genuine problems.
@@ -155,6 +186,14 @@ export function salesView(course) {
     })),
     // Section 5 — derived, always present for a real OS.
     resources: derivedResources(course),
+    // The derived headline numbers, shown as a band under the hero.
+    stats: courseStats(course),
+    // Optional sections. Each renders only when the course authors it, which is
+    // what keeps this one template usable by every OS without special-casing.
+    outcome: s.outcome || null,      // the single "what you walk away with" claim
+    journey: s.journey || [],        // welcome → modules → boss battle → graduation
+    vault: s.vault || null,          // a premium bundled library, with its own anchor
+    how: s.how || DEFAULT_STEPS,     // the learning model, when it isn't the default
     // Section 7 — renders only when authored.
     audience: { yes: s.audience?.yes || [], no: s.audience?.no || [] },
     // Section 10 — base + authored.
