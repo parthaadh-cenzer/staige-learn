@@ -55,6 +55,17 @@ export const PRODUCTS = {
     introductoryOfferEndsAt: null,
     priceEnv: { regular: 'STRIPE_PRICE_JOB_HUNTER_REGULAR', intro: 'STRIPE_PRICE_JOB_HUNTER_INTRO' },
   },
+  'app-builder': {
+    key: 'app-builder',
+    courseSlug: 'ai-app-builder-os',
+    name: 'AI App Builder OS',
+    regularPrice: 10,
+    introductoryPrice: 5,
+    currency: CURRENCY,
+    introductoryOfferActive: true,
+    introductoryOfferEndsAt: null,
+    priceEnv: { regular: 'STRIPE_PRICE_APP_BUILDER_REGULAR', intro: 'STRIPE_PRICE_APP_BUILDER_INTRO' },
+  },
 }
 
 export const productList = Object.values(PRODUCTS)

@@ -4,7 +4,7 @@
 // here can never touch another course's progress.
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, ChevronDown, RotateCcw, Download, ListChecks, Loader2 } from 'lucide-react'
+import { Check, ChevronDown, RotateCcw, Download, ListChecks, Loader2, PartyPopper } from 'lucide-react'
 import * as Icons from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { useCourse } from '../course/CourseContext'
@@ -78,8 +78,11 @@ export default function Checklists() {
   )
 }
 
-function ChecklistCard({ list, open, onToggleOpen, courseTitle }) {
+// Exported so the Builder Vault can present the same collapsible, persisted
+// checklist card under its own chrome without a second implementation.
+export function ChecklistCard({ list, open, onToggleOpen, courseTitle }) {
   const [busy, setBusy] = useState(false)
+  const [confirmReset, setConfirmReset] = useState(false)
   const state = useStore((s) => s.checklists[list.id])
   const toggle = useStore((s) => s.toggleChecklistItem)
   const reset = useStore((s) => s.resetChecklist)
@@ -151,14 +154,38 @@ function ChecklistCard({ list, open, onToggleOpen, courseTitle }) {
                 ))}
               </ul>
 
+              {/* Everything ticked — a small, calm celebration rather than a
+                  confetti cannon. `role="status"` announces it once. */}
+              {complete && (
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                  role="status"
+                  className={`mt-4 flex items-center gap-2 rounded-2xl border ${t.border} ${t.bgSoft} p-3.5 text-sm font-semibold ${t.text}`}
+                >
+                  <PartyPopper className="h-4 w-4 shrink-0" /> {list.doneMessage || 'Every box ticked. This section is ready.'}
+                </motion.p>
+              )}
+
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <button onClick={download} disabled={busy} className="btn-ghost !py-2 !text-xs">
                   {busy
                     ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Preparing…</>
                     : <><Download className="h-3.5 w-3.5" /> Download PDF</>}
                 </button>
-                <button onClick={() => reset(list.id)} disabled={done === 0} className="btn-ghost !py-2 !text-xs"><RotateCcw className="h-3.5 w-3.5" /> Reset</button>
-                <span className="ml-auto text-xs text-faint">Saved to this device</span>
+                {/* Reset asks first. Clearing a checklist someone has worked
+                    through for an hour on a mis-click is not recoverable. */}
+                {confirmReset ? (
+                  <>
+                    <span className="text-xs font-semibold text-flamingo-500">Clear all {done} ticks?</span>
+                    <button onClick={() => { reset(list.id); setConfirmReset(false) }} className="btn-ghost !py-2 !text-xs !text-flamingo-500">Yes, reset</button>
+                    <button onClick={() => setConfirmReset(false)} className="btn-ghost !py-2 !text-xs">Cancel</button>
+                  </>
+                ) : (
+                  <button onClick={() => setConfirmReset(true)} disabled={done === 0} className="btn-ghost !py-2 !text-xs">
+                    <RotateCcw className="h-3.5 w-3.5" /> Reset
+                  </button>
+                )}
+                <span className="ml-auto text-xs text-faint">Saved to your account</span>
               </div>
             </div>
           </motion.div>

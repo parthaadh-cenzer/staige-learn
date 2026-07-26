@@ -8,10 +8,18 @@ import { Byte } from '../components/mascots'
 
 const Icon = ({ name, ...p }) => { const C = Icons[name] || Icons.Sparkles; return <C {...p} /> }
 
-const PRICING_TONE = { Free: 'brand', Freemium: 'sky2', Paid: 'flamingo' }
-const PRICING_ORDER = ['Free', 'Freemium', 'Paid']
+// 'Open Source' is its own tier, not a synonym for Free: it tells a builder they
+// can read, fork and self-host the thing, which is a different decision from
+// "costs nothing today". A course that never uses the value simply gets no chip
+// for it — the filter row is built from what its resources actually declare.
+const PRICING_TONE = { Free: 'brand', 'Open Source': 'mint', Freemium: 'sky2', Paid: 'flamingo' }
+const PRICING_ORDER = ['Free', 'Open Source', 'Freemium', 'Paid']
 
-export default function Vault() {
+// `embedded` drops this page's own heading block so it can sit inside another
+// page's chrome — the Builder Vault mounts it under a shared header with a
+// back link. The search, filters and cards are identical either way, which is
+// the point: one directory implementation, two placements.
+export default function Vault({ embedded = false }) {
   const { course } = useCourse()
   const resources = course.resources.items
   const resourceCategories = course.resources.categories
@@ -37,13 +45,15 @@ export default function Vault() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Byte size={68} proximity className="shrink-0" />
-        <div>
-          <h1 className="font-display text-3xl font-extrabold text-ink-900">{course.ui.vault.title}</h1>
-          <p className="text-muted">{course.ui.vault.blurb}</p>
+      {!embedded && (
+        <div className="flex items-center gap-4">
+          <Byte size={68} proximity className="shrink-0" />
+          <div>
+            <h1 className="font-display text-3xl font-extrabold text-ink-900">{course.ui.vault.title}</h1>
+            <p className="text-muted">{course.ui.vault.blurb}</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Recommended stacks — the shortcut for people who don't want to choose */}
       {stacks.length > 0 && (
@@ -142,7 +152,7 @@ function ToolCard({ r, cat }) {
   if (!r.url) return <div className="card flex h-full flex-col p-4">{body}</div>
 
   return (
-    <a href={r.url} target="_blank" rel="noreferrer" className="card card-hover group flex h-full flex-col p-4">
+    <a href={r.url} target="_blank" rel="noopener noreferrer" className="card card-hover group flex h-full flex-col p-4">
       {body}
     </a>
   )

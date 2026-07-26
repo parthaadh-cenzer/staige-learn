@@ -30,8 +30,11 @@ const course = {
   lastUpdated: '2026-06-25',
   skillLevel: 'Beginner',
   art: { emoji: '🚀', tone: 'brand' },
-  goal: { emoji: '💰', label: 'Earn Extra Income', order: 1 },
-  collections: ['business'],
+  goal: { emoji: '💰', label: 'Earn More', order: 1 },
+  // `creator` first → this is the homepage group it appears in (see
+  // homeGroups() in ../index.js). It stays in `business` so the /courses
+  // "Business & income" filter is unchanged.
+  collections: ['creator', 'business'],
 
   // ── Sales page (see pages/OsSalesPage.jsx + course/sales.js) ──────────────
   sales: {

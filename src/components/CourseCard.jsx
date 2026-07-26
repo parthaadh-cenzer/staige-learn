@@ -59,9 +59,14 @@ function ctaLabel({ course, cta, user, owned, entitlementsKnown }) {
     return cta.started ? 'Continue Building' : 'Start OS'
   }
   // Don't promise a price to someone whose entitlements we haven't loaded yet —
-  // an owner would briefly see "Buy for $5" for their own course on every load.
+  // an owner would briefly see "Buy for …" for their own course on every load.
   if (!entitlementsKnown) return null
-  return user ? 'Buy for $5' : 'Sign In to Purchase'
+  // The amount is READ from the catalogue, never written here. This label used
+  // to say "Buy for $5" literally, which would quietly become a lie the moment
+  // shared/catalog.mjs changed — the one edit that is supposed to be enough.
+  if (!user) return 'Sign In to Purchase'
+  const price = priceView(course.product)
+  return price ? `Buy for ${price.display}` : 'Buy this OS'
 }
 
 export default function CourseCard({ course, size = 'card', className = '' }) {

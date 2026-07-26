@@ -22,7 +22,11 @@ export default function CourseSwitcher({ onNavigate }) {
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600"><Rocket className="h-4 w-4" /></span>
         <span className="min-w-0 flex-1">
           <span className="block text-[10px] font-bold uppercase tracking-wider text-faint">Course</span>
-          <span className="block truncate text-sm font-semibold text-ink-900">{course.title}</span>
+          {/* Wraps to a second line rather than truncating. "AI App Builder OS"
+              was rendering as "AI App Builder …", which hides which course you
+              are actually in — the one thing this control exists to tell you.
+              `leading-tight` keeps two lines the same height as one-and-a-bit. */}
+          <span className="block text-sm font-semibold leading-tight text-ink-900">{course.title}</span>
         </span>
         <ChevronDown className={`h-4 w-4 shrink-0 text-faint transition ${open ? 'rotate-180' : ''}`} />
       </button>

@@ -65,12 +65,18 @@ mistake here can never touch live user data.
 1. Open the new project → **SQL Editor** → **New query**
 2. Paste the entire contents of [`supabase/migrations/0001_staige_learn.sql`](../supabase/migrations/0001_staige_learn.sql)
 3. **Run**
+4. Then run each later migration in order, in the same way:
+   [`0002_admin_grants.sql`](../supabase/migrations/0002_admin_grants.sql),
+   [`0003_admins_and_purchase_ids.sql`](../supabase/migrations/0003_admins_and_purchase_ids.sql),
+   [`0004_ai_app_builder_os.sql`](../supabase/migrations/0004_ai_app_builder_os.sql).
+   They are additive and idempotent — safe to re-run on a live database.
 
 Then confirm it worked — this is the check that proves the paywall has a floor:
 
 1. **Table Editor** → you should see 7 tables: `profiles`, `courses`, `products`,
    `purchases`, `course_access`, `course_progress`, `webhook_events`.
-2. `courses` should already contain 3 rows, `products` 3 rows.
+2. `courses` should contain 4 rows and `products` 4 rows once `0004` has run
+   (the fourth is AI App Builder OS / `app-builder`).
 3. **Authentication → Policies** → every one of the 7 tables must show
    **RLS enabled**. `webhook_events` correctly shows RLS enabled with **no
    policies** — that's intentional: only the service-role key may touch it.
@@ -119,19 +125,20 @@ reviewing your account information. This takes 2–3 days."** Until that review
 clears you cannot accept live payments. Test mode works now, so build and test
 today and flip to live when Stripe approves you.
 
-For **each** of the three courses, in **Product catalog → Create product**:
+For **each** of the four courses, in **Product catalog → Create product**:
 
 | Product name | Price 1 (Regular) | Price 2 (Introductory) |
 |---|---|---|
 | AI Side Hustle OS | $10.00 USD, One-off | $5.00 USD, One-off |
 | AI Marketing OS | $10.00 USD, One-off | $5.00 USD, One-off |
 | AI Job Hunter OS | $10.00 USD, One-off | $5.00 USD, One-off |
+| AI App Builder OS | $10.00 USD, One-off | $5.00 USD, One-off |
 
 For each product: create it with the **$10** price first, then open the product and
 **+ Add another price** for **$5**. Both must be **One-off**, not recurring — the
 code uses `mode: 'payment'` and a recurring price would fail the session.
 
-Then copy the six **Price IDs** (they start `price_…`, found on each price row —
+Then copy the eight **Price IDs** (they start `price_…`, found on each price row —
 *not* the product id, which starts `prod_…`):
 
 ```
@@ -141,7 +148,13 @@ STRIPE_PRICE_MARKETING_REGULAR   = price_…   ($10)
 STRIPE_PRICE_MARKETING_INTRO     = price_…   ($5)
 STRIPE_PRICE_JOB_HUNTER_REGULAR  = price_…   ($10)
 STRIPE_PRICE_JOB_HUNTER_INTRO    = price_…   ($5)
+STRIPE_PRICE_APP_BUILDER_REGULAR = price_…   ($10)
+STRIPE_PRICE_APP_BUILDER_INTRO   = price_…   ($5)
 ```
+
+> **If the App Builder pair is missing**, only that course is affected:
+> `/api/checkout` returns a clean 503 for `app-builder` and every other course
+> keeps selling. Nothing is ever granted without a verified payment.
 
 Getting a regular/intro pair backwards charges $10 while the page advertises $5.
 Double-check the amount next to each id.
@@ -186,6 +199,8 @@ STRIPE_PRICE_MARKETING_REGULAR
 STRIPE_PRICE_MARKETING_INTRO
 STRIPE_PRICE_JOB_HUNTER_REGULAR
 STRIPE_PRICE_JOB_HUNTER_INTRO
+STRIPE_PRICE_APP_BUILDER_REGULAR
+STRIPE_PRICE_APP_BUILDER_INTRO
 APP_URL = https://learn.staige.world
 ```
 
@@ -293,14 +308,26 @@ setting a password, which is yours to choose, not mine to invent. So:
 4. Run [`supabase/scripts/grant_owner_access.sql`](../supabase/scripts/grant_owner_access.sql)
    in the SQL Editor.
 
-That grants all three active courses with `source = 'owner_access'` and
+That grants **every active course** with `source = 'owner_access'` and
 `purchase_id = null`. It creates **no** `purchases` row — a fabricated purchase
-would put $15 of revenue in your books that Stripe has never heard of and that
-would never reconcile. The script refuses to run (with a clear message) if the
-account doesn't exist yet, and re-running it is harmless.
+would put revenue in your books that Stripe has never heard of and that would
+never reconcile. The script refuses to run (with a clear message) if the account
+doesn't exist yet, and re-running it is harmless.
 
-The script's final `select` prints the three entitlements plus a
-`purchase_rows_should_be_zero` column — that column must read `0`.
+The grant is derived from `public.courses`, not a hardcoded list, so a course
+added by a later migration is picked up the next time you run the script — after
+`0004`, re-running it adds AI App Builder OS. There is no second place to edit,
+and no way for a new course to be silently missed.
+
+The same script also inserts the `public.admins` row. Admin authority is a
+server-side fact: RLS lets an account read its own admin row so the UI can
+reflect it, but there is no insert/update/delete policy, so nobody can make
+themselves an admin from the browser. There is deliberately **no** admin email
+environment variable and no client-side email check anywhere in the codebase.
+
+The script's final `select` prints one row per entitlement plus a
+`purchase_rows_should_be_zero` column — that column must read `0`, and
+`is_admin` must read `true`.
 
 ## Before you publish: two copy decisions
 

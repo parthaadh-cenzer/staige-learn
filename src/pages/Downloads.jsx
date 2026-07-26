@@ -2,13 +2,15 @@
 // preview and the downloaded document are two renderings of that same doc
 // (src/lib/resourceDoc.js). No dead links, no "file coming soon", no drift.
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Download, Eye, X, Search, Loader2, FileDown } from 'lucide-react'
+import { Download, Eye, X, Search, Loader2, FileDown, Clock, ArrowRight } from 'lucide-react'
 import * as Icons from 'lucide-react'
 import { useCourse } from '../course/CourseContext'
 import { buildResourceDoc, FORMATS } from '../lib/resourceDoc'
 import { downloadDoc } from '../lib/exporters'
 import { Reveal } from '../components/ui'
+import { UpcomingResources, isReady } from '../components/Blocks'
 import { Byte } from '../components/mascots'
 import ResourcePreview from '../components/ResourcePreview'
 import { tone as toneOf } from '../lib/tones'
@@ -25,7 +27,7 @@ function FormatTag({ format, className = '' }) {
 }
 
 export default function Downloads() {
-  const { course } = useCourse()
+  const { course, base } = useCourse()
   const items = course.downloads?.items || []
   const [preview, setPreview] = useState(null)
   const [busy, setBusy] = useState(null)
@@ -35,8 +37,14 @@ export default function Downloads() {
 
   // One doc per resource, built once. The card badge, the preview and the
   // download all read the same object — that's what keeps them in sync.
+  // Only resources that HAVE a document get one: a resource whose file doesn't
+  // exist yet, or that opens a page elsewhere in the course, has nothing to
+  // render or export, and building an empty doc for it would be the first step
+  // towards a download button with nothing behind it.
   const docs = useMemo(
-    () => Object.fromEntries(items.map((r) => [r.id, buildResourceDoc(r, course.title)])),
+    () => Object.fromEntries(
+      items.filter((r) => r.available !== false && !r.opensTo).map((r) => [r.id, buildResourceDoc(r, course.title)])
+    ),
     [items, course.title]
   )
 
@@ -64,6 +72,13 @@ export default function Downloads() {
       return `${r.title} ${r.description} ${r.type}`.toLowerCase().includes(query)
     })
   }, [items, q, kind, mod])
+
+  // Resources you can use now get the grid. Ones whose file doesn't exist yet
+  // are still listed — in one collapsed strip at the end, so a paid Download
+  // Center doesn't open on a screen of disabled buttons. Both respect the
+  // filters, so a search still finds an upcoming resource by name.
+  const ready = filtered.filter(isReady)
+  const pending = filtered.filter((r) => !isReady(r))
 
   return (
     <div className="space-y-6">
@@ -113,12 +128,12 @@ export default function Downloads() {
         </div>
       )}
 
-      {filtered.length === 0 && (
+      {ready.length === 0 && pending.length === 0 && (
         <p className="card p-8 text-center text-muted">Nothing matches that. Try another keyword or clear the filters.</p>
       )}
 
       <div className="grid gap-4 md:grid-cols-2">
-        {filtered.map((r, i) => {
+        {ready.map((r, i) => {
           const t = toneOf(r.tone)
           return (
             <Reveal key={r.id} delay={Math.min(i, 6) * 0.04}>
@@ -132,27 +147,43 @@ export default function Downloads() {
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                       <span className={`pill ${t.border} ${t.text}`}>{r.type}</span>
                       {r.kind === 'template' && <span className="pill border-sky2-100 text-sky2-500">🤖 AI Template</span>}
+                      {r.opensTo && <span className="pill border-brand-200 text-brand-600">In this course</span>}
                       <FormatTag format={docs[r.id]?.format} />
                       <span className="pill border-line text-muted">{r.moduleLabel}</span>
                     </div>
                   </div>
                 </div>
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-700">{r.description}</p>
+                {/* Only ready resources reach this grid, so there are two
+                    states: one that opens the real thing elsewhere in the
+                    course, and one that previews and downloads a real
+                    document. Resources with no file are in the collapsed
+                    Upcoming strip below and never render a button at all. */}
                 <div className="mt-4 flex gap-2">
-                  <button onClick={() => setPreview(docs[r.id])} className="btn-ghost flex-1 justify-center !py-2 !text-xs">
-                    <Eye className="h-3.5 w-3.5" /> Preview
-                  </button>
-                  <button onClick={() => take(r)} disabled={busy === r.id} className="btn-primary flex-1 justify-center !py-2 !text-xs">
-                    {busy === r.id
-                      ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Preparing…</>
-                      : <><Download className="h-3.5 w-3.5" /> Download</>}
-                  </button>
+                  {r.opensTo ? (
+                    <Link to={`${base}/${r.opensTo}`} className="btn-primary w-full justify-center !py-2 !text-xs">
+                      <ArrowRight className="h-3.5 w-3.5" /> Open
+                    </Link>
+                  ) : (
+                    <>
+                      <button onClick={() => setPreview(docs[r.id])} className="btn-ghost flex-1 justify-center !py-2 !text-xs">
+                        <Eye className="h-3.5 w-3.5" /> Preview
+                      </button>
+                      <button onClick={() => take(r)} disabled={busy === r.id} className="btn-primary flex-1 justify-center !py-2 !text-xs">
+                        {busy === r.id
+                          ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Preparing…</>
+                          : <><Download className="h-3.5 w-3.5" /> Download</>}
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </Reveal>
           )
         })}
       </div>
+
+      <UpcomingResources items={pending} />
 
       {/* Future updates — the closing part of the Bonus Resource Center. Copy is
           course-driven; the card hides for courses that don't supply it. */}

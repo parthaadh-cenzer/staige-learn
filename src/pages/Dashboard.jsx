@@ -173,7 +173,7 @@ export default function Dashboard() {
                       <ContextMascot who={MODULE_MASCOT[m.id]?.pose} size={36} />
                     </div>
                   </div>
-                  <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-faint">Module {m.num}</p>
+                  <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-faint">{m.label || `Module ${m.num}`}</p>
                   <p className="font-display font-bold text-ink-900">{m.title}</p>
                   <p className="mt-1 line-clamp-2 text-sm text-muted">{m.subtitle}</p>
                   <div className="mt-3"><ProgressBar value={mp.pct} tone={m.color} /></div>

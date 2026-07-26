@@ -16,7 +16,7 @@ import {
   ArrowRight, BookOpen, Signal, Lock, Hammer, Rocket, CheckCircle2, XCircle,
   Library, Bot, Download, ListChecks, LayoutDashboard, Workflow, Flag, CloudUpload,
 } from 'lucide-react'
-import { activeCourses, getCourseBySlug, courseBase, osPath } from '../data/courses'
+import { activeCourses, goalCourses, homeGroups, courseBase, osPath } from '../data/courses'
 import { useAuth } from '../auth/AuthProvider'
 import { PriceTag, PriceNote, BuyButton } from '../components/Pricing'
 import HeroStory, { STORIES } from '../components/HeroStory'
@@ -102,13 +102,15 @@ function WhatIsStaige() {
 }
 
 // ── 5 · Choose your goal ────────────────────────────────────────────────────
-// Landing-specific labels ("Earn More", "Work Smarter") over registry courses.
-const GOALS = [
-  { label: 'Get Hired', emoji: '💼', slug: 'ai-job-hunter-os' },
-  { label: 'Earn More', emoji: '💰', slug: 'ai-side-hustle-os' },
-  { label: 'Grow Your Business', emoji: '📈', slug: 'ai-marketing-os' },
-  { label: 'Work Smarter', emoji: '🤖', slug: 'ai-employee-os' },
-]
+// Derived from the registry: any course that declares a `goal` gets a card,
+// ordered by `goal.order`. This used to be a hardcoded array of four slugs,
+// which is why a newly-registered course could not appear here.
+
+// Literal, JIT-visible class strings keyed by how many goal cards there are.
+const GOAL_COLS = {
+  1: 'lg:grid-cols-1', 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3',
+  4: 'lg:grid-cols-4', 5: 'lg:grid-cols-3 xl:grid-cols-5', 6: 'lg:grid-cols-3',
+}
 
 function ChooseYourGoal() {
   return (
@@ -117,10 +119,12 @@ function ChooseYourGoal() {
         <h2 id="goal-title" className="text-center font-display text-3xl font-extrabold text-ink-900">
           What do you want to solve?
         </h2>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {GOALS.map((g) => {
-            const course = getCourseBySlug(g.slug)
-            if (!course) return null
+        {/* Column count follows how many goals there actually are, rather than
+            assuming four. Literal class strings — Tailwind's JIT scans source
+            text, so an interpolated `lg:grid-cols-${n}` would compile to nothing. */}
+        <div className={`mt-8 grid gap-4 sm:grid-cols-2 ${GOAL_COLS[Math.min(goalCourses.length, 6)] || 'lg:grid-cols-4'}`}>
+          {goalCourses.map((course) => {
+            const g = course.goal
             const t = toneOf(course.art?.tone || 'brand')
             const inner = (
               <>
@@ -139,13 +143,13 @@ function ChooseYourGoal() {
             const shell = 'card flex h-full flex-col p-5'
             return course.isActive ? (
               <Link
-                key={g.slug} to={courseBase(g.slug)}
+                key={course.slug} to={courseBase(course.slug)}
                 className={`${shell} card-hover border ${t.border} focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40`}
               >
                 {inner}
               </Link>
             ) : (
-              <div key={g.slug} className={`${shell} border-line opacity-80`} aria-label={`${g.label} — ${course.title}, coming soon`}>
+              <div key={course.slug} className={`${shell} border-line opacity-80`} aria-label={`${g.label} — ${course.title}, coming soon`}>
                 {inner}
               </div>
             )
@@ -157,12 +161,6 @@ function ChooseYourGoal() {
 }
 
 // ── 6 · Operating systems — the one and only catalog on this page ──────────
-const OS_GROUPS = [
-  { title: 'Career', slugs: ['ai-job-hunter-os', 'ai-employee-os'] },
-  { title: 'Business', slugs: ['ai-marketing-os', 'ai-agents-business', 'small-business-os'] },
-  { title: 'Creator', slugs: ['ai-side-hustle-os'] },
-]
-
 function OsCard({ course }) {
   const { ownsCourse } = useAuth()
   const t = toneOf(course.art?.tone || 'brand')
@@ -227,15 +225,17 @@ function OperatingSystems() {
         <p className="mx-auto mt-2 max-w-xl text-center text-muted">
           One problem each. One payment each. Yours to keep using.
         </p>
+        {/* Groups and membership both come from the registry (homeGroups()).
+            This was a hardcoded list of slugs, which is exactly why registering
+            AI App Builder OS was not enough to make it appear here. A course
+            whose collections match no group still renders, under "More", so
+            nothing can silently go missing again. */}
         <div className="mt-8 space-y-8">
-          {OS_GROUPS.map((g) => (
-            <div key={g.title}>
+          {homeGroups().map((g) => (
+            <div key={g.id}>
               <h3 className="mb-3 font-display text-sm font-bold uppercase tracking-wider text-faint">{g.title}</h3>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {g.slugs.map((slug) => {
-                  const c = getCourseBySlug(slug)
-                  return c ? <OsCard key={slug} course={c} /> : null
-                })}
+                {g.courses.map((c) => <OsCard key={c.slug} course={c} />)}
               </div>
             </div>
           ))}
@@ -398,7 +398,9 @@ function Pricing() {
         <p className="mx-auto mt-2 max-w-xl text-center text-muted">
           One-time payment. No subscription. Access applies only to the operating system purchased.
         </p>
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        {/* Two-up then four-up: with four active courses a hardcoded 3-column
+            grid left one card stranded on its own row. */}
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {activeCourses.map((c) => (
             <div key={c.slug} className="card flex flex-col p-6 text-center">
               <span className="text-2xl" aria-hidden="true">{c.art?.emoji}</span>

@@ -1,0 +1,155 @@
+// ============================================================================
+//  APP IDEA GENERATOR
+//  Every idea the document lists, with its category, difficulty and monetisation badge.
+//  GENERATED from the course document — see scripts/README or regenerate.
+// ============================================================================
+
+export const ideaCategories = [
+  {
+    "id": "productivity",
+    "name": "Productivity",
+    "tone": "brand",
+    "icon": "CheckSquare"
+  },
+  {
+    "id": "finance",
+    "name": "Finance",
+    "tone": "mint",
+    "icon": "Wallet"
+  },
+  {
+    "id": "health",
+    "name": "Health & Fitness",
+    "tone": "flamingo",
+    "icon": "HeartPulse"
+  },
+  {
+    "id": "education",
+    "name": "Education",
+    "tone": "sky2",
+    "icon": "GraduationCap"
+  },
+  {
+    "id": "business",
+    "name": "Business",
+    "tone": "gold",
+    "icon": "Briefcase"
+  },
+  {
+    "id": "creative",
+    "name": "Creative",
+    "tone": "flamingo",
+    "icon": "Palette"
+  },
+  {
+    "id": "lifestyle",
+    "name": "Lifestyle",
+    "tone": "sun",
+    "icon": "Sun"
+  },
+  {
+    "id": "startup",
+    "name": "Startup",
+    "tone": "brand",
+    "icon": "Rocket"
+  },
+  {
+    "id": "ai",
+    "name": "AI Apps",
+    "tone": "sky2",
+    "icon": "Sparkles"
+  }
+]
+
+export const appIdeas = [
+  { id: "ab-i-habit-tracker", name: "Habit Tracker", desc: "Track daily habits, streaks, and progress.", difficulty: "Beginner", money: "Freemium", category: "productivity" },
+  { id: "ab-i-pomodoro-timer", name: "Pomodoro Timer", desc: "Focus timer with productivity statistics.", difficulty: "Beginner", money: "Freemium", category: "productivity" },
+  { id: "ab-i-daily-journal", name: "Daily Journal", desc: "Write entries with mood tracking.", difficulty: "Beginner", money: "Subscription", category: "productivity" },
+  { id: "ab-i-notes-app", name: "Notes App", desc: "Folders, tags, search, and rich text.", difficulty: "Beginner", money: "Freemium", category: "productivity" },
+  { id: "ab-i-goal-tracker", name: "Goal Tracker", desc: "Track long-term goals visually.", difficulty: "Beginner", money: "Premium", category: "productivity" },
+  { id: "ab-i-to-do-app", name: "To-Do App", desc: "Tasks, priorities, deadlines.", difficulty: "Beginner", money: "Freemium", category: "productivity" },
+  { id: "ab-i-time-blocking-planner", name: "Time Blocking Planner", desc: "Schedule your day visually.", difficulty: "Intermediate", money: "Subscription", category: "productivity" },
+  { id: "ab-i-focus-mode", name: "Focus Mode", desc: "Website blocker + timer.", difficulty: "Intermediate", money: "Premium", category: "productivity" },
+  { id: "ab-i-meeting-notes", name: "Meeting Notes", desc: "AI-ready meeting summaries placeholder.", difficulty: "Intermediate", money: "SaaS", category: "productivity" },
+  { id: "ab-i-personal-dashboard", name: "Personal Dashboard", desc: "Weather, calendar, notes.", difficulty: "Beginner", money: "Freemium", category: "productivity" },
+  { id: "ab-i-expense-tracker", name: "Expense Tracker", desc: "Log spending, sort it by category, see where the money went.", difficulty: "Beginner", money: "Freemium", category: "finance" },
+  { id: "ab-i-budget-planner", name: "Budget Planner", desc: "Set monthly limits per category and watch them fill up.", difficulty: "Beginner", money: "Freemium", category: "finance" },
+  { id: "ab-i-subscription-tracker", name: "Subscription Tracker", desc: "Every recurring charge in one place, with renewal dates.", difficulty: "Beginner", money: "Premium", category: "finance" },
+  { id: "ab-i-bill-reminder", name: "Bill Reminder", desc: "Due dates, reminders, and a paid/unpaid history.", difficulty: "Beginner", money: "Ads", category: "finance" },
+  { id: "ab-i-investment-portfolio", name: "Investment Portfolio", desc: "Track holdings, allocation and performance over time.", difficulty: "Advanced", money: "Subscription", category: "finance" },
+  { id: "ab-i-debt-payoff-planner", name: "Debt Payoff Planner", desc: "Compare snowball and avalanche plans and see the payoff date.", difficulty: "Intermediate", money: "Premium", category: "finance" },
+  { id: "ab-i-savings-goal-tracker", name: "Savings Goal Tracker", desc: "Name a goal, set a target, watch the progress bar fill.", difficulty: "Beginner", money: "Freemium", category: "finance" },
+  { id: "ab-i-emi-calculator", name: "EMI Calculator", desc: "Work out instalments, interest and total cost for any loan.", difficulty: "Beginner", money: "Ads", category: "finance" },
+  { id: "ab-i-tax-calculator", name: "Tax Calculator", desc: "Estimate tax owed from income and deductions.", difficulty: "Intermediate", money: "One-Time Purchase", category: "finance" },
+  { id: "ab-i-invoice-generator", name: "Invoice Generator", desc: "Build, brand and export professional invoices as PDFs.", difficulty: "Intermediate", money: "SaaS", category: "finance" },
+  { id: "ab-i-workout-planner", name: "Workout Planner", desc: "Build routines, schedule sessions and log completed workouts.", difficulty: "Intermediate", money: "Freemium", category: "health" },
+  { id: "ab-i-meal-planner", name: "Meal Planner", desc: "Plan the week, generate a shopping list from it.", difficulty: "Intermediate", money: "Subscription", category: "health" },
+  { id: "ab-i-water-reminder", name: "Water Reminder", desc: "Daily intake target with gentle nudges and a streak.", difficulty: "Beginner", money: "Ads", category: "health" },
+  { id: "ab-i-calorie-tracker", name: "Calorie Tracker", desc: "Log meals against a daily target and see the trend.", difficulty: "Intermediate", money: "Freemium", category: "health" },
+  { id: "ab-i-meditation-timer", name: "Meditation Timer", desc: "Session timer with intervals, ambience and a practice log.", difficulty: "Beginner", money: "Premium", category: "health" },
+  { id: "ab-i-running-tracker", name: "Running Tracker", desc: "Record distance, pace and route history run by run.", difficulty: "Advanced", money: "Freemium", category: "health" },
+  { id: "ab-i-gym-progress", name: "Gym Progress", desc: "Track sets, reps and personal bests per exercise.", difficulty: "Intermediate", money: "Premium", category: "health" },
+  { id: "ab-i-stretch-reminder", name: "Stretch Reminder", desc: "Timed stretch breaks for people who sit all day.", difficulty: "Beginner", money: "Ads", category: "health" },
+  { id: "ab-i-sleep-tracker", name: "Sleep Tracker", desc: "Log hours and quality, then read the weekly pattern.", difficulty: "Intermediate", money: "Freemium", category: "health" },
+  { id: "ab-i-habit-coach", name: "Habit Coach", desc: "Habits, streaks and a nudge when one starts slipping.", difficulty: "Intermediate", money: "Subscription", category: "health" },
+  { id: "ab-i-flashcards", name: "Flashcards", desc: "Create decks and revise them with spaced repetition.", difficulty: "Intermediate", money: "Freemium", category: "education" },
+  { id: "ab-i-quiz-builder", name: "Quiz Builder", desc: "Write quizzes, share a link, see the scores.", difficulty: "Intermediate", money: "SaaS", category: "education" },
+  { id: "ab-i-student-planner", name: "Student Planner", desc: "Timetable, deadlines and exams in one calendar.", difficulty: "Beginner", money: "Freemium", category: "education" },
+  { id: "ab-i-homework-tracker", name: "Homework Tracker", desc: "Every assignment with its subject, due date and status.", difficulty: "Beginner", money: "Ads", category: "education" },
+  { id: "ab-i-study-timer", name: "Study Timer", desc: "Focus sessions with breaks and a record of hours studied.", difficulty: "Beginner", money: "Ads", category: "education" },
+  { id: "ab-i-language-learning", name: "Language Learning", desc: "Vocabulary drills, streaks and daily practice goals.", difficulty: "Advanced", money: "Subscription", category: "education" },
+  { id: "ab-i-notes-organizer", name: "Notes Organizer", desc: "Notebooks, tags and search across everything you wrote.", difficulty: "Intermediate", money: "Freemium", category: "education" },
+  { id: "ab-i-gpa-calculator", name: "GPA Calculator", desc: "Enter grades and credits, get the GPA and what you need next.", difficulty: "Beginner", money: "Ads", category: "education" },
+  { id: "ab-i-reading-tracker", name: "Reading Tracker", desc: "Books, progress, ratings and a yearly reading goal.", difficulty: "Beginner", money: "Freemium", category: "education" },
+  { id: "ab-i-assignment-manager", name: "Assignment Manager", desc: "Break assignments into steps and track them to submission.", difficulty: "Intermediate", money: "Premium", category: "education" },
+  { id: "ab-i-crm", name: "CRM", desc: "Contacts, deals and pipeline stages for a small sales team.", difficulty: "Advanced", money: "SaaS", category: "business" },
+  { id: "ab-i-inventory-system", name: "Inventory System", desc: "Stock levels, low-stock alerts and movement history.", difficulty: "Advanced", money: "SaaS", category: "business" },
+  { id: "ab-i-hr-dashboard", name: "HR Dashboard", desc: "Headcount, attendance and team metrics at a glance.", difficulty: "Advanced", money: "SaaS", category: "business" },
+  { id: "ab-i-employee-directory", name: "Employee Directory", desc: "Searchable staff profiles with roles and departments.", difficulty: "Beginner", money: "SaaS", category: "business" },
+  { id: "ab-i-client-portal", name: "Client Portal", desc: "A private area where clients see files, updates and invoices.", difficulty: "Advanced", money: "SaaS", category: "business" },
+  { id: "ab-i-appointment-booking", name: "Appointment Booking", desc: "Availability, slot selection and confirmation flow.", difficulty: "Intermediate", money: "Subscription", category: "business" },
+  { id: "ab-i-pos-dashboard", name: "POS Dashboard", desc: "Sales, products and daily takings for a counter business.", difficulty: "Advanced", money: "SaaS", category: "business" },
+  { id: "ab-i-helpdesk", name: "Helpdesk", desc: "Support tickets with status, priority and replies.", difficulty: "Advanced", money: "SaaS", category: "business" },
+  { id: "ab-i-leave-management", name: "Leave Management", desc: "Request, approve and track time off across a team.", difficulty: "Intermediate", money: "SaaS", category: "business" },
+  { id: "ab-i-analytics-dashboard", name: "Analytics Dashboard", desc: "Charts and KPIs pulled together on one screen.", difficulty: "Advanced", money: "SaaS", category: "business" },
+  { id: "ab-i-portfolio-builder", name: "Portfolio Builder", desc: "Assemble a project portfolio and publish it as a site.", difficulty: "Intermediate", money: "Freemium", category: "creative" },
+  { id: "ab-i-resume-builder", name: "Resume Builder", desc: "Fill in sections, pick a layout, export a clean PDF.", difficulty: "Intermediate", money: "Freemium", category: "creative" },
+  { id: "ab-i-mood-board", name: "Mood Board", desc: "Collect images, colours and type into a shareable board.", difficulty: "Intermediate", money: "Premium", category: "creative" },
+  { id: "ab-i-color-palette-generator", name: "Color Palette Generator", desc: "Generate, lock and export palettes with HEX codes.", difficulty: "Beginner", money: "Ads", category: "creative" },
+  { id: "ab-i-brand-kit", name: "Brand Kit", desc: "Logo, colours, fonts and voice in one handover document.", difficulty: "Intermediate", money: "One-Time Purchase", category: "creative" },
+  { id: "ab-i-logo-showcase", name: "Logo Showcase", desc: "A gallery that presents logo work in context.", difficulty: "Beginner", money: "Premium", category: "creative" },
+  { id: "ab-i-design-feedback-app", name: "Design Feedback App", desc: "Pin comments directly onto an uploaded design.", difficulty: "Advanced", money: "SaaS", category: "creative" },
+  { id: "ab-i-wireframe-tool", name: "Wireframe Tool", desc: "Drag simple blocks into low-fidelity screen layouts.", difficulty: "Advanced", money: "Freemium", category: "creative" },
+  { id: "ab-i-social-media-planner", name: "Social Media Planner", desc: "Plan posts per channel on a visual calendar.", difficulty: "Intermediate", money: "Subscription", category: "creative" },
+  { id: "ab-i-content-calendar", name: "Content Calendar", desc: "Schedule, categorise and track what goes out when.", difficulty: "Intermediate", money: "Subscription", category: "creative" },
+  { id: "ab-i-travel-planner", name: "Travel Planner", desc: "Itinerary, bookings and budget for one trip.", difficulty: "Intermediate", money: "Freemium", category: "lifestyle" },
+  { id: "ab-i-recipe-manager", name: "Recipe Manager", desc: "Save recipes, scale portions, build a shopping list.", difficulty: "Intermediate", money: "Freemium", category: "lifestyle" },
+  { id: "ab-i-movie-tracker", name: "Movie Tracker", desc: "Watchlist, ratings and what you finished this year.", difficulty: "Beginner", money: "Ads", category: "lifestyle" },
+  { id: "ab-i-book-tracker", name: "Book Tracker", desc: "Shelves, progress and notes for everything you read.", difficulty: "Beginner", money: "Ads", category: "lifestyle" },
+  { id: "ab-i-pet-care", name: "Pet Care", desc: "Feeding, walks, vet visits and medication reminders.", difficulty: "Beginner", money: "Freemium", category: "lifestyle" },
+  { id: "ab-i-event-planner", name: "Event Planner", desc: "Guests, tasks, budget and a countdown to the day.", difficulty: "Intermediate", money: "Premium", category: "lifestyle" },
+  { id: "ab-i-gift-wishlist", name: "Gift Wishlist", desc: "A shareable list so people stop guessing.", difficulty: "Beginner", money: "Ads", category: "lifestyle" },
+  { id: "ab-i-home-inventory", name: "Home Inventory", desc: "Catalogue what you own, with value and warranty dates.", difficulty: "Intermediate", money: "Premium", category: "lifestyle" },
+  { id: "ab-i-packing-list", name: "Packing List", desc: "Reusable packing templates per trip type.", difficulty: "Beginner", money: "Ads", category: "lifestyle" },
+  { id: "ab-i-bucket-list", name: "Bucket List", desc: "Goals, progress and the photos to prove you did them.", difficulty: "Beginner", money: "Freemium", category: "lifestyle" },
+  { id: "ab-i-job-board", name: "Job Board", desc: "Post roles, filter listings, collect applications.", difficulty: "Advanced", money: "SaaS", category: "startup" },
+  { id: "ab-i-freelance-marketplace", name: "Freelance Marketplace", desc: "Two-sided listings with profiles, briefs and proposals.", difficulty: "Advanced", money: "SaaS", category: "startup" },
+  { id: "ab-i-lms", name: "LMS", desc: "Courses, lessons and learner progress in one platform.", difficulty: "Advanced", money: "SaaS", category: "startup" },
+  { id: "ab-i-course-platform", name: "Course Platform", desc: "Sell and deliver a course with modules and completion tracking.", difficulty: "Advanced", money: "Subscription", category: "startup" },
+  { id: "ab-i-community-platform", name: "Community Platform", desc: "Spaces, threads and member profiles for a niche group.", difficulty: "Advanced", money: "Subscription", category: "startup" },
+  { id: "ab-i-ai-tool-directory", name: "AI Tool Directory", desc: "A searchable, categorised index of AI tools.", difficulty: "Intermediate", money: "Ads", category: "startup" },
+  { id: "ab-i-newsletter-platform", name: "Newsletter Platform", desc: "Write, schedule and manage subscribers for an email list.", difficulty: "Advanced", money: "SaaS", category: "startup" },
+  { id: "ab-i-saas-landing-builder", name: "SaaS Landing Builder", desc: "Compose landing pages from ready-made sections.", difficulty: "Advanced", money: "SaaS", category: "startup" },
+  { id: "ab-i-booking-platform", name: "Booking Platform", desc: "Multi-provider availability, booking and confirmations.", difficulty: "Advanced", money: "SaaS", category: "startup" },
+  { id: "ab-i-agency-dashboard", name: "Agency Dashboard", desc: "Clients, projects and delivery status for a small agency.", difficulty: "Advanced", money: "SaaS", category: "startup" },
+  { id: "ab-i-ai-resume-builder", name: "AI Resume Builder", desc: "Sharpen bullet points and tailor a resume per role.", difficulty: "Intermediate", money: "Freemium", category: "ai" },
+  { id: "ab-i-ai-email-writer", name: "AI Email Writer", desc: "Turn a rough note into a polished email in your tone.", difficulty: "Intermediate", money: "Freemium", category: "ai" },
+  { id: "ab-i-ai-blog-generator", name: "AI Blog Generator", desc: "Outline, draft and edit long-form posts.", difficulty: "Intermediate", money: "Subscription", category: "ai" },
+  { id: "ab-i-ai-study-assistant", name: "AI Study Assistant", desc: "Summarise notes, then generate flashcards and quizzes.", difficulty: "Advanced", money: "Freemium", category: "ai" },
+  { id: "ab-i-ai-travel-planner", name: "AI Travel Planner", desc: "Generate a day-by-day itinerary from a few preferences.", difficulty: "Advanced", money: "Freemium", category: "ai" },
+  { id: "ab-i-ai-meeting-notes", name: "AI Meeting Notes", desc: "Turn a transcript into decisions and action items.", difficulty: "Advanced", money: "SaaS", category: "ai" },
+  { id: "ab-i-ai-prompt-library", name: "AI Prompt Library", desc: "Save, tag and reuse prompts that actually worked.", difficulty: "Beginner", money: "Freemium", category: "ai" },
+  { id: "ab-i-ai-code-explainer", name: "AI Code Explainer", desc: "Paste code, get a plain-English explanation of it.", difficulty: "Intermediate", money: "Freemium", category: "ai" },
+  { id: "ab-i-ai-flashcards", name: "AI Flashcards", desc: "Generate revision cards straight from your own notes.", difficulty: "Intermediate", money: "Freemium", category: "ai" },
+  { id: "ab-i-ai-research-assistant", name: "AI Research Assistant", desc: "Summarise sources and pull out the key claims.", difficulty: "Advanced", money: "Subscription", category: "ai" },
+]

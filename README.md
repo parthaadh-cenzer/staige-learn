@@ -61,6 +61,7 @@ changes required.
 | **AI Side Hustle OS** — 6 modules, 19 lessons | Active (default) |
 | **AI Marketing OS** — 8 modules, 59 lessons | Active |
 | **AI Job Hunter OS** — 8 modules, 62 lessons, 5,300 XP | Active |
+| **AI App Builder OS** — 9 modules, 49 lessons, 4,350 XP, Builder Vault | Active |
 | AI Employee OS · AI Agents for Business · AI Small Business OS | Coming soon |
 
 ### Structure
@@ -202,6 +203,41 @@ AI Job Hunter OS closes every module with four blocks, in this order:
 `resourcelist` reads the **same** `course.downloads.items` the Download Center uses,
 filtered by `moduleId` + `kind` — so a resource is authored once and appears in both
 places, and both generate the same real file via `src/lib/resourceFile.js`.
+
+A download item may also declare, in place of authored content:
+
+| Field | Effect |
+|-------|--------|
+| `opensTo: 'builder-vault/palettes'` | Card shows **In this course** and an **Open** button linking to that course-relative route, instead of a download. |
+| `available: false` | Card shows **File pending** with the button disabled. The title still appears, so nothing from the course is silently dropped. |
+
+Both are honesty valves: a resource that has no file must never render a button
+that produces one. `src/course/sales.js` also excludes them when it derives the
+"downloads included" claims, so the sales page can't advertise files that aren't
+there. Courses that set neither field behave exactly as before.
+
+### Builder Vault (`features.builderVault`)
+
+AI App Builder OS adds a nine-page premium area at `/launchpad/<slug>/builder-vault`:
+Builder Recipes, Landing Page Templates, 50 Websites to Study, Color Palettes,
+Font Pairings, App Idea Generator, Launch Checklist, UI/UX Checklist and the
+Resource Vault. Every route is wrapped in the same `<Gate>` as a lesson, and the
+whole block is mounted only when the course sets `features.builderVault`, so no
+other course grows dead routes.
+
+- `src/data/appbuilder/` — the data. `recipes/study/palettes/fonts/appIdeas/checklists`
+  are **generated** from the source document; `resources/templates/downloads` and the
+  lesson content are hand-authored.
+- `src/data/appbuilder/counts.js` — integers only, imported by the registry so the
+  main bundle never pulls ~100 kB of vault data just to print "95 recipes".
+  `vault.js` warns in development if a count drifts from reality.
+- `src/pages/builder/` — the pages. `VaultPage.jsx` is the shared chrome.
+  The Resource Vault and both checklists **reuse** the platform's existing
+  `Vault.jsx` / `Checklists.jsx` rather than reimplementing a directory or a
+  checklist.
+
+A module may also set `label` (e.g. `'Boss Battle'`) to name itself instead of
+being titled by its position; everything falls back to `Module ${num}`.
 
 ### Downloads — one source, three formats
 

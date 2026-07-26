@@ -31,6 +31,7 @@ export function useActiveCourse() {
 // first one that exists so the nav link can never 404 into a disabled feature.
 export function resourceRoute(course) {
   const f = course?.features || {}
+  if (f.builderVault) return 'builder-vault'
   if (f.downloads) return 'downloads'
   if (f.vault) return 'vault'
   if (f.checklists) return 'checklists'

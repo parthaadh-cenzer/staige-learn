@@ -8,7 +8,7 @@ import { tone as toneOf } from '../lib/tones'
 import { generate } from '../lib/byteLab'
 import { buildResourceDoc, worksheetDoc, docToText, pickFormat, FORMATS } from '../lib/resourceDoc'
 import { downloadDoc } from '../lib/exporters'
-import { Reveal } from './ui'
+import { ProgressBar, Reveal } from './ui'
 import { Byte, Capy } from './mascots'
 
 const Icon = ({ name, ...props }) => {
@@ -152,6 +152,188 @@ function Blueprint({ b }) {
         })}
       </ol>
       {b.note && <p className="mt-5 border-t border-line pt-4 text-sm text-ink-700">{b.note}</p>}
+    </div>
+  )
+}
+
+// ── AI App Builder OS blocks ────────────────────────────────────────────────
+// Generic by design — nothing below names a course, so any future course can
+// use them by emitting the block.
+
+// The module's Goal + its opening quote, as one opening beat.
+function Goal({ b }) {
+  return (
+    <div className="card overflow-hidden border-brand-200 bg-gradient-to-br from-brand-50 to-sage-50 p-6">
+      <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600">
+        <Icons.Target className="h-4 w-4" /> Goal
+      </p>
+      <p className="mt-1.5 font-display text-lg font-bold leading-snug text-ink-900">{b.text}</p>
+      {b.quote && (
+        <blockquote className="mt-4 border-l-2 border-brand-300 pl-4 text-sm italic leading-relaxed text-ink-700">
+          “{b.quote}”
+        </blockquote>
+      )}
+    </div>
+  )
+}
+
+// A prompt you are meant to paste somewhere else — so it gets a real copy
+// button rather than asking anyone to select awkwardly-wrapped text by hand.
+function PromptBlock({ b }) {
+  const [copied, setCopied] = useState(false)
+  const copy = () => {
+    navigator.clipboard?.writeText(b.text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1400)
+  }
+  return (
+    <div className="card border-sky2-100 bg-sky2-50/50 p-5">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-sky2-500">
+          <Icons.Terminal className="h-4 w-4" /> {b.title || 'Prompt'}
+        </span>
+        <button onClick={copy} className="btn-ghost ml-auto !py-1.5 !text-xs">
+          {copied ? <><Icons.Check className="h-3.5 w-3.5 text-brand-600" /> Copied</> : <><Icons.Copy className="h-3.5 w-3.5" /> Copy prompt</>}
+        </button>
+      </div>
+      <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-2xl border border-line bg-card p-4 font-sans text-sm leading-relaxed text-ink-800">
+        {b.text}
+      </pre>
+      {b.note && <p className="mt-3 text-sm text-ink-700">{b.note}</p>}
+    </div>
+  )
+}
+
+// 🎯 Builder Mission — the "go and do this" beat that closes a module.
+function Mission({ b }) {
+  return (
+    <div className="card border-gold-100 bg-gradient-to-br from-gold-50 to-sun-50 p-6">
+      <p className="font-display text-xl font-extrabold text-ink-900">{b.title}</p>
+      {b.intro && <p className="mt-1.5 text-sm leading-relaxed text-ink-700">{b.intro}</p>}
+      <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+        {b.items.map((it, i) => (
+          <li key={i} className="flex items-start gap-2.5 rounded-2xl border border-gold-100 bg-card px-3.5 py-2.5">
+            <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md bg-gold-100 text-[11px] font-bold text-gold-500">{i + 1}</span>
+            <span className="text-sm text-ink-800">{it}</span>
+          </li>
+        ))}
+      </ul>
+      {b.note && <p className="mt-4 border-t border-gold-100 pt-3 text-sm italic leading-relaxed text-ink-700">{b.note}</p>}
+    </div>
+  )
+}
+
+// A linear "this → then this" chain. The course document draws these with ↓
+// arrows; here they're a real ordered list so screen readers get the sequence.
+function Chain({ b }) {
+  const t = toneOf(b.tone || 'brand')
+  return (
+    <ol className="space-y-1">
+      {b.steps.map((s, i) => (
+        <li key={i}>
+          <div className={`rounded-2xl border ${t.border} ${t.bgSoft} px-4 py-2.5 text-sm font-medium text-ink-800`}>{s}</div>
+          {i < b.steps.length - 1 && (
+            <div className="flex justify-center py-0.5" aria-hidden="true">
+              <Icons.ArrowDown className={`h-4 w-4 ${t.text}`} />
+            </div>
+          )}
+        </li>
+      ))}
+      {b.note && <li className="pt-2 text-sm text-muted">{b.note}</li>}
+    </ol>
+  )
+}
+
+// 🏆 The Builder's Dashboard that ends each module. Stats, unlocked skills and
+// the portfolio progress bar exactly as the course document specifies them.
+// It only "lights up" once the module is genuinely finished, so it reads as a
+// reward rather than a spoiler.
+function BuilderDashboard({ b }) {
+  const completed = useStore((s) => s.completed)
+  const { course } = useCourse()
+  // The dashboard names the module it reports on. Without `moduleId` it stays
+  // unlocked, which is the right default: a dashboard that can't identify its
+  // module must not imply the learner hasn't finished one.
+  const mod = b.moduleId ? course.getModule(b.moduleId) : null
+  const earned = mod ? mod.lessons.every((l) => completed.includes(l.id)) : true
+  const t = toneOf(b.final ? 'gold' : mod?.color || 'brand')
+
+  return (
+    <div className={`card relative overflow-hidden border ${earned ? t.border : 'border-line'} ${earned ? t.bgSoft : 'bg-sage-50'} p-6`}>
+      {earned && <div className={`pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full ${t.bgSoft} blur-3xl`} />}
+      <div className="relative">
+        <p className={`font-display text-xl font-extrabold ${earned ? 'text-ink-900' : 'text-faint'}`}>
+          {earned ? b.title : `🔒 ${b.title}`}
+        </p>
+        {!earned && <p className="mt-1 text-xs text-faint">Finish every lesson in this module to light this up.</p>}
+
+        <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {b.stats.map((s) => (
+            <div key={s.label} className="rounded-2xl border border-line bg-card p-3.5">
+              <dt className="text-xs font-semibold text-faint">{s.label}</dt>
+              <dd className={`mt-0.5 font-display text-lg font-extrabold ${earned ? t.text : 'text-faint'}`}>{s.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {b.skills?.length > 0 && (
+          <div className="mt-5">
+            <p className="text-xs font-bold uppercase tracking-wider text-faint">{b.skillsLabel || 'Skills Unlocked'}</p>
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {b.skills.map((s) => (
+                <li key={s} className={`pill ${earned ? `${t.border} ${t.text}` : 'border-line text-faint'}`}>
+                  <Icons.Check className="h-3.5 w-3.5" /> {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="mt-5">
+          <div className="mb-1.5 flex items-baseline justify-between text-xs">
+            <span className="font-semibold text-muted">{b.progressLabel || 'Portfolio Progress'}</span>
+            <span className={`font-display font-extrabold ${t.text}`}>{b.pct}%</span>
+          </div>
+          <ProgressBar value={b.pct} tone={b.final ? 'gold' : mod?.color || 'brand'} />
+        </div>
+
+        {b.next && (
+          <p className="mt-5 border-t border-line pt-4 text-sm">
+            <span className="font-bold uppercase tracking-wider text-faint">{b.nextLabel || 'Next Mission'}</span>
+            <span className="mt-1 block text-ink-800">{b.next}</span>
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Cross-links from a lesson into the course's premium vault. Course-relative,
+// so they inherit the same entitlement gate the vault pages have.
+function VaultLink({ b }) {
+  const { base } = useCourse()
+  return (
+    <div>
+      {b.intro && <p className="mb-2.5 text-sm text-ink-700">{b.intro}</p>}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {b.items.map((it) => {
+          const t = toneOf(it.tone)
+          return (
+            <Link key={it.to} to={`${base}/${it.to}`} className={`card card-hover group flex items-start gap-3 border ${t.border} p-4`}>
+              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-2xl ${t.bgSoft} ${t.text}`}>
+                <Icon name={it.icon} className="h-5 w-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-1.5 font-display text-sm font-bold text-ink-900">
+                  {it.label}
+                  <Icons.ArrowRight className="h-3.5 w-3.5 shrink-0 text-faint transition group-hover:translate-x-0.5 group-hover:text-ink-700" />
+                </span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-muted">{it.desc}</span>
+              </span>
+            </Link>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -693,6 +875,57 @@ function Tracker({ b }) {
 
 // ── Module-end sections ─────────────────────────────────────────────────────
 
+// ── Upcoming resources ──────────────────────────────────────────────────────
+// A resource with no file yet is still part of the course, so it is never
+// dropped — but it must not compete for attention with the ones you can
+// actually use. Collapsed by default, quiet styling, no button that implies a
+// download exists. Exported because the Download Center renders the same strip.
+export const isReady = (r) => Boolean(r.opensTo) || r.available !== false
+
+export function UpcomingResources({ items, className = '' }) {
+  const [open, setOpen] = useState(false)
+  if (!items.length) return null
+  return (
+    <div className={`rounded-2xl border border-dashed border-line bg-sage-50/60 ${className}`}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-2.5 px-4 py-3 text-left"
+      >
+        <Icons.Clock className="h-4 w-4 shrink-0 text-faint" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-ink-700">
+            Upcoming resources <span className="font-normal text-faint">({items.length})</span>
+          </span>
+          <span className="block text-xs text-faint">
+            Listed here so nothing from the course is hidden. These files aren’t available yet — they’ll
+            appear in your account automatically when they are.
+          </span>
+        </span>
+        <Icons.ChevronDown className={`h-4 w-4 shrink-0 text-faint transition ${open ? 'rotate-180' : ''}`} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }} className="overflow-hidden"
+          >
+            <ul className="space-y-1.5 border-t border-line px-4 py-3">
+              {items.map((r) => (
+                <li key={r.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm">
+                  <span className="font-medium text-ink-700">{r.title}</span>
+                  <span className="text-xs text-faint">{r.type}</span>
+                  <span className="w-full text-xs leading-relaxed text-faint">{r.description}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 // One list, two uses. `kind: 'template'` renders a module's 🤖 AI Templates;
 // `kind: 'download'` renders its Downloads. Both read the SAME course resource
 // data the Download Center uses (course.downloads.items), filtered by module —
@@ -706,6 +939,9 @@ function ResourceList({ b }) {
     (r) => r.moduleId === b.moduleId && (r.kind || 'download') === b.kind
   )
   if (!items.length) return null
+
+  const ready = items.filter(isReady)
+  const pending = items.filter((r) => !isReady(r))
 
   const isTemplate = b.kind === 'template'
   const cfg = isTemplate
@@ -735,12 +971,21 @@ function ResourceList({ b }) {
   return (
     <div className="pt-2">
       <div className="mb-1 flex items-center gap-2">
-        <h3 className="font-display text-xl font-bold text-ink-900">{cfg.title}</h3>
-        <span className="pill border-line text-muted">{items.length}</span>
+        {/* A course can name this section itself (e.g. "📦 Graduation Kit")
+            rather than stacking its own heading above a generic "Downloads". */}
+        <h3 className="font-display text-xl font-bold text-ink-900">{b.title || cfg.title}</h3>
+        {/* The count is what you can USE right now. Counting resources that
+            have no file yet would inflate it into a promise. */}
+        <span className="pill border-line text-muted">{ready.length}</span>
       </div>
       <p className="mb-4 text-sm text-muted">{b.blurb || cfg.blurb}</p>
+
+      {/* Ready things first, at full weight. A resource whose file doesn't
+          exist yet is still listed — it's part of the course — but it moves
+          into a collapsed strip below so a module's downloads read as "here's
+          what you get", not as a wall of dead buttons. */}
       <div className="grid gap-3 sm:grid-cols-2">
-        {items.map((r, i) => {
+        {ready.map((r, i) => {
           const rt = toneOf(r.tone || cfg.tone)
           return (
             <Reveal key={r.id} delay={Math.min(i, 6) * 0.03}>
@@ -753,25 +998,37 @@ function ResourceList({ b }) {
                     <p className="font-display text-sm font-bold text-ink-900">{r.title}</p>
                     <span className="mt-1 flex flex-wrap gap-1.5">
                       <span className={`pill ${rt.border} ${rt.text}`}>{r.type}</span>
-                      {!isTemplate && <span className="pill border-line text-faint">{FORMATS[pickFormat(r)]?.label}</span>}
+                      {r.opensTo && <span className="pill border-brand-200 text-brand-600">In this course</span>}
+                      {!isTemplate && !r.opensTo && (
+                        <span className="pill border-line text-faint">{FORMATS[pickFormat(r)]?.label}</span>
+                      )}
                     </span>
                   </div>
                 </div>
                 <p className="mt-2.5 flex-1 text-xs leading-relaxed text-muted">{r.description}</p>
-                <button onClick={() => take(r)} disabled={busy === r.id} className="btn-ghost mt-3 w-full justify-center !py-2 !text-xs">
-                  {isTemplate
-                    ? (copied === r.id
-                        ? <><Icons.Check className="h-3.5 w-3.5 text-brand-600" /> Copied</>
-                        : <><Icons.Copy className="h-3.5 w-3.5" /> Copy template</>)
-                    : (busy === r.id
-                        ? <><Icons.Loader2 className="h-3.5 w-3.5 animate-spin" /> Preparing…</>
-                        : <><Icons.Download className="h-3.5 w-3.5" /> Download</>)}
-                </button>
+                {r.opensTo ? (
+                  <Link to={`${base}/${r.opensTo}`} className="btn-ghost mt-3 w-full justify-center !py-2 !text-xs">
+                    <Icons.ArrowRight className="h-3.5 w-3.5" /> Open
+                  </Link>
+                ) : (
+                  <button onClick={() => take(r)} disabled={busy === r.id} className="btn-ghost mt-3 w-full justify-center !py-2 !text-xs">
+                    {isTemplate
+                      ? (copied === r.id
+                          ? <><Icons.Check className="h-3.5 w-3.5 text-brand-600" /> Copied</>
+                          : <><Icons.Copy className="h-3.5 w-3.5" /> Copy template</>)
+                      : (busy === r.id
+                          ? <><Icons.Loader2 className="h-3.5 w-3.5 animate-spin" /> Preparing…</>
+                          : <><Icons.Download className="h-3.5 w-3.5" /> Download</>)}
+                  </button>
+                )}
               </div>
             </Reveal>
           )
         })}
       </div>
+
+      {pending.length > 0 && <UpcomingResources items={pending} className={ready.length ? 'mt-3' : ''} />}
+
       {course.features?.downloads && (
         <Link to={`${base}/downloads`} className={`mt-3 inline-flex items-center gap-1.5 text-sm font-semibold ${t.text} hover:underline`}>
           See everything in the Download Center <Icons.ArrowRight className="h-4 w-4" />
@@ -1027,6 +1284,8 @@ const MAP = {
   checklist: Checklist, quiz: Quiz, pathquiz: PathQuiz, scorecard: Scorecard, worksheet: Worksheet, tracker: Tracker,
   bytelab: ByteLab,
   resourcelist: ResourceList, bytesummary: ByteSummary, moduleunlock: ModuleUnlock,
+  goal: Goal, prompt: PromptBlock, mission: Mission, chain: Chain,
+  dashboard: BuilderDashboard, vaultlink: VaultLink,
 }
 
 export default function Blocks({ blocks }) {

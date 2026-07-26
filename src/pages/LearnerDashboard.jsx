@@ -122,7 +122,9 @@ function LockedOsCard({ course }) {
       <div className="mt-4">
         <PriceTag course={course} />
         <PriceNote course={course} className="mt-1.5" />
-        <BuyButton course={course} className="mt-3" label="Buy for $5" />
+        {/* No label → BuyButton derives its own text from the catalogue price.
+            Hardcoding "Buy for $5" here made a second place to edit a price. */}
+        <BuyButton course={course} className="mt-3" />
         <Link
           to={osPath(course)}
           className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink-900"

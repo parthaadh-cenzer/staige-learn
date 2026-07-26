@@ -30,7 +30,7 @@ export default function ModuleView() {
             <div className="flex items-center gap-3">
               <div className={`grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-gradient-to-br ${t.grad} text-3xl shadow-soft`}>{m.emoji}</div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-faint">Module {m.num}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-faint">{m.label || `Module ${m.num}`}</p>
                 <h1 className="font-display text-2xl font-extrabold text-ink-900 sm:text-3xl">{m.title}</h1>
               </div>
             </div>

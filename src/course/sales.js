@@ -26,10 +26,18 @@ const len = (x) => (Array.isArray(x) ? x.length : 0)
 
 // Resources are DERIVED from what the course actually ships, so the list is
 // always honest: a course with no downloads shows no "Downloads" card.
+// A resource only counts towards a sales claim if it actually produces a file.
+// A card marked `available: false` (no file yet) or one that just opens another
+// page in the course (`opensTo`) is real content, but promising "editable files
+// that leave with you" on the strength of it would be selling something that
+// isn't there. Courses that set neither flag are unaffected — every item counts,
+// exactly as before.
+const isDownloadable = (d) => d.available !== false && !d.opensTo
+
 function derivedResources(course) {
   const f = course.features || {}
   const promptCount = len(course.prompts?.items)
-  const downloadItems = course.downloads?.items || []
+  const downloadItems = (course.downloads?.items || []).filter(isDownloadable)
   const templateCount = downloadItems.filter((d) => d.kind === 'template').length
   const downloadCount = downloadItems.length - templateCount
   const checklistCount = len(course.checklists?.items)
@@ -105,7 +113,7 @@ function mergeFaq(course) {
 
 // The hero fact-chips. Only shows what the course genuinely includes.
 function heroHighlights(course) {
-  const downloadItems = course.downloads?.items || []
+  const downloadItems = (course.downloads?.items || []).filter(isDownloadable)
   const templateCount = downloadItems.filter((d) => d.kind === 'template').length
   const downloadCount = downloadItems.length - templateCount
   return [
@@ -136,6 +144,10 @@ export function salesView(course) {
     // revealing lesson content.
     modules: (course.modules || []).map((m) => ({
       num: m.num,
+      // A module may name itself ("Boss Battle") instead of taking its
+      // position as a title. Falls back to the number, so nothing changes for
+      // the courses that don't.
+      label: m.label || `Module ${m.num}`,
       emoji: m.emoji,
       title: m.title,
       desc: m.subtitle || '',

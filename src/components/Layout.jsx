@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Library, Lightbulb, CalendarDays, Vault, Flame, Trophy, Menu, X, BookOpen,
-  ListChecks, Download, Home, LayoutGrid, Settings,
+  ListChecks, Download, Home, LayoutGrid, Settings, Gem,
 } from 'lucide-react'
 import MascotAdvisor from './MascotAdvisor'
 import CourseSwitcher from './CourseSwitcher'
@@ -20,7 +20,12 @@ const NAV_LABEL = {
   prompts: 'Prompt Library', ideas: 'Hustle Ideas', calendar: 'Content Calendar',
   vault: 'Resource Vault', checklists: 'Checklists', downloads: 'Download Center',
   challenge: '7-Day Challenge', badges: 'Achievements',
+  builderVault: 'Builder Vault',
 }
+
+// Feature keys whose route isn't just `/<key>`. Kept as data so navGroups
+// stays a one-liner per item rather than growing special cases.
+const NAV_PATH = { builderVault: 'builder-vault' }
 
 // Build the sidebar nav for the active course (course-relative links + the
 // bonus areas that course enables). Labels are course-driven so each course
@@ -28,13 +33,17 @@ const NAV_LABEL = {
 function navGroups(base, features, ui) {
   const f = features || ALL_FEATURES
   const label = (key) => ui?.[key]?.nav || NAV_LABEL[key]
-  const item = (key, icon) => f[key] && { to: `${base}/${key}`, label: label(key), icon }
+  const item = (key, icon) => f[key] && { to: `${base}/${NAV_PATH[key] || key}`, label: label(key), icon }
   return [
     { section: 'Learn', items: [
       { to: base, end: true, label: 'Dashboard', icon: LayoutDashboard },
       { to: `${base}/modules`, label: 'All Modules', icon: BookOpen },
     ]},
     { section: 'Bonuses', items: [
+      // Gem, not Vault: lucide's Vault glyph is a square with a cross inside,
+      // which at 18px reads as an error/close icon rather than "premium
+      // library" — the opposite of what this nav item is inviting you to open.
+      item('builderVault', Gem),
       item('prompts', Library),
       item('ideas', Lightbulb),
       item('calendar', CalendarDays),

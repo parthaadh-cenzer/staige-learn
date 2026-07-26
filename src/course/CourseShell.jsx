@@ -23,6 +23,15 @@ import Challenge from '../pages/Challenge'
 import Badges from '../pages/Badges'
 import Welcome from '../pages/Welcome'
 import ComingSoon from '../pages/ComingSoon'
+import BuilderVault from '../pages/builder/BuilderVault'
+import Recipes from '../pages/builder/Recipes'
+import Templates from '../pages/builder/Templates'
+import StudyList from '../pages/builder/StudyList'
+import Palettes from '../pages/builder/Palettes'
+import Fonts from '../pages/builder/Fonts'
+import AppIdeas from '../pages/builder/AppIdeas'
+import VaultChecklist from '../pages/builder/VaultChecklist'
+import VaultResources from '../pages/builder/VaultResources'
 
 export default function CourseShell() {
   const { courseSlug } = useParams()
@@ -65,6 +74,27 @@ export default function CourseShell() {
           <Route path="downloads" element={<Gate what={'The templates & downloads'}><Downloads /></Gate>} />
           <Route path="challenge" element={<Gate what="The challenge"><Challenge /></Gate>} />
           <Route path="badges" element={<Gate what="Your achievements"><Badges /></Gate>} />
+
+          {/* The Builder Vault — nine premium libraries, every one behind the
+              same Gate as a lesson. Mounted only for courses that declare
+              `features.builderVault`, so no other course grows dead routes. */}
+          {course.features?.builderVault && (
+            <Route path="builder-vault">
+              <Route index element={<Gate what="The Builder Vault"><BuilderVault /></Gate>} />
+              <Route path="recipes" element={<Gate what="Builder Recipes"><Recipes /></Gate>} />
+              <Route path="templates" element={<Gate what="The template library"><Templates /></Gate>} />
+              <Route path="study" element={<Gate what="The study directory"><StudyList /></Gate>} />
+              <Route path="palettes" element={<Gate what="The Color Palette Library"><Palettes /></Gate>} />
+              <Route path="fonts" element={<Gate what="The Font Pairing Library"><Fonts /></Gate>} />
+              <Route path="ideas" element={<Gate what="The App Idea Generator"><AppIdeas /></Gate>} />
+              <Route path="launch-checklist" element={<Gate what="The Launch Checklist"><VaultChecklist group="launch" /></Gate>} />
+              <Route path="uiux-checklist" element={<Gate what="The UI/UX Checklist"><VaultChecklist group="uiux" /></Gate>} />
+              <Route path="resources" element={<Gate what="The Resource Vault"><VaultResources /></Gate>} />
+              {/* An unknown vault path is a typo, not a 404 — send them to the
+                  vault home rather than all the way back to the dashboard. */}
+              <Route path="*" element={<Navigate to={`${courseBase(course.slug)}/builder-vault`} replace />} />
+            </Route>
+          )}
 
           <Route path="*" element={<Navigate to={courseBase(course.slug)} replace />} />
         </Routes>

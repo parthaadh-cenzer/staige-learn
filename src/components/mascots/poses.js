@@ -31,6 +31,18 @@ export const MODULE_MASCOT = {
   'mkt-m6': { pose: 'byte', line: 'Byte’s building the list you actually own.' },
   'mkt-m7': { pose: 'byte', line: 'Byte’s finding the pattern in your numbers.' },
   'mkt-m8': { pose: 'capy', line: 'Capy’s week now runs without him.' },
+
+  // AI App Builder OS — Capy fronts the modules where you decide and ship,
+  // Byte fronts the ones where the tooling does the lifting.
+  'ab-m1': { pose: 'capy', line: 'Capy’s about to publish his first site. Nervously.' },
+  'ab-m2': { pose: 'byte', line: 'Byte’s hunting references, not blank canvases.' },
+  'ab-m3': { pose: 'capy', line: 'Capy’s treating this one like a real client.' },
+  'ab-m4': { pose: 'byte', line: 'Byte’s cutting the feature list down to Version 1.' },
+  'ab-m5': { pose: 'byte', line: 'Byte’s adding one AI feature. Only one.' },
+  'ab-m6': { pose: 'capy', line: 'Capy’s obsessing over the last 10%.' },
+  'ab-m7': { pose: 'capy', line: 'Capy’s hitting publish before it’s perfect.' },
+  'ab-m8': { pose: 'byte', line: 'One sentence. No brief. Byte’s not helping this time.' },
+  'ab-m9': { pose: 'capy', line: 'Capy’s building the one he actually cares about.' },
 }
 
 // Which character narrates each bonus area.

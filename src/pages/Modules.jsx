@@ -30,7 +30,10 @@ export default function Modules() {
                   <div className={`grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-gradient-to-br ${t.grad} text-3xl shadow-soft`}>{m.emoji}</div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-faint">Module {m.num}</span>
+                      {/* `label` lets a module name itself — "Boss Battle"
+                          rather than "Module 8" — without lying about where it
+                          sits in the sequence. */}
+                      <span className="text-xs font-bold uppercase tracking-wider text-faint">{m.label || `Module ${m.num}`}</span>
                       {mp.complete && <span className={`pill ${t.border} ${t.text}`}><CheckCircle2 className="h-3.5 w-3.5" /> Complete</span>}
                     </div>
                     <h2 className="font-display text-xl font-bold text-ink-900">{m.title}</h2>

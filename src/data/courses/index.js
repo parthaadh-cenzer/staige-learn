@@ -23,6 +23,7 @@ import { productForCourse } from '../../../shared/catalog.mjs'
 import aiSideHustleOS from './ai-side-hustle-os'
 import aiMarketingOS from './ai-marketing-os'
 import aiJobHunterOS from './ai-job-hunter-os'
+import aiAppBuilderOS from './ai-app-builder-os'
 import aiEmployeeOS from './ai-employee-os'
 import aiAgentsBusiness from './ai-agents-business'
 import smallBusinessOS from './small-business-os'
@@ -96,6 +97,7 @@ export const courses = [
   aiSideHustleOS,
   aiMarketingOS,
   aiJobHunterOS,
+  aiAppBuilderOS,
   aiEmployeeOS,
   aiAgentsBusiness,
   smallBusinessOS,
@@ -146,6 +148,43 @@ export const goalCourses = courses
   .sort((a, b) => (a.goal.order ?? 99) - (b.goal.order ?? 99))
 
 export const coursesInCollection = (id) => courses.filter((c) => c.collections?.includes(id))
+
+// ── The homepage's "Choose Your Operating System" grouping ───────────────────
+// This exists because the homepage previously carried a HARDCODED array of
+// slugs, which meant adding a course to the registry was silently not enough to
+// make it appear — AI App Builder OS shipped invisible for exactly that reason.
+//
+// Membership is derived: a course lands in the group named by the FIRST entry of
+// its own `collections` array that matches a group, so a course chooses its own
+// home by ordering that array, and can still belong to other collections for
+// the /courses filters without being listed twice here.
+//
+// The `other` bucket is the part that matters most: a course whose collections
+// match no group still renders, in its own row, instead of disappearing. There
+// is no configuration you can get wrong that makes a registered course vanish
+// from the homepage again.
+export const HOME_GROUPS = [
+  { id: 'career', title: 'Career' },
+  { id: 'business', title: 'Business' },
+  { id: 'creator', title: 'Creator' },
+]
+
+export function homeGroups() {
+  const ids = new Set(HOME_GROUPS.map((g) => g.id))
+  const placed = new Map(HOME_GROUPS.map((g) => [g.id, []]))
+  const other = []
+
+  for (const c of courses) {
+    const groupId = (c.collections || []).find((id) => ids.has(id))
+    if (groupId) placed.get(groupId).push(c)
+    else other.push(c)
+  }
+
+  return [
+    ...HOME_GROUPS.map((g) => ({ ...g, courses: placed.get(g.id) })),
+    ...(other.length ? [{ id: 'other', title: 'More', courses: other }] : []),
+  ].filter((g) => g.courses.length)
+}
 
 // Which course is the learner actually in the middle of? Derived from the last
 // lesson they opened (lesson ids are globally unique and course-prefixed), so

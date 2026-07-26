@@ -34,11 +34,16 @@ begin
     raise exception 'No auth user for partha.adh@gmail.com. Sign up at https://learn.staige.world/signup first, then re-run this script.';
   end if;
 
+  -- EVERY active course, not a hardcoded list. Adding a course to
+  -- public.courses (see the numbered migrations) is all it takes for the owner
+  -- to be granted it on the next run — there is no second place to remember to
+  -- edit, and no way for a new course to be silently missed.
+  -- Coming Soon courses are not in public.courses at all, so they cannot be
+  -- granted here even by mistake.
   insert into public.course_access (user_id, course_id, source, purchase_id, granted_at, revoked_at)
   select v_user_id, c.id, 'owner_access', null, now(), null
   from public.courses c
   where c.status = 'active'
-    and c.slug in ('ai-side-hustle-os', 'ai-marketing-os', 'ai-job-hunter-os')
   on conflict (user_id, course_id) do update
     set source     = 'owner_access',
         revoked_at = null,
@@ -56,7 +61,7 @@ begin
   raise notice 'Granted/refreshed % owner entitlements + admin role for % (user_id %)', v_granted, 'partha.adh@gmail.com', v_user_id;
 end $$;
 
--- Verify. Expect exactly 3 rows, all source=owner_access, purchase_id null,
+-- Verify. Expect one row per ACTIVE course, all source=owner_access, purchase_id null,
 -- revoked_at null, is_admin = true — and no purchases row for this user.
 select
   u.email,

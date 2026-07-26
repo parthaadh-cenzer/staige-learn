@@ -46,7 +46,7 @@ export default function Lesson() {
       setCelebration({
         emoji: m.emoji, tone: m.color, big: true,
         xp: lesson.xp,
-        title: `Module ${m.num} complete!`,
+        title: `${m.label || `Module ${m.num}`} complete!`,
         subtitle: `You finished “${m.title}”. That’s a badge earned and real momentum built.`,
         cta: next ? 'Next module →' : 'Back to dashboard',
       })
@@ -77,7 +77,7 @@ export default function Lesson() {
       <div className="mb-6">
         <Link to={`${base}/module/${moduleId}`} className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink-800"><ArrowLeft className="h-4 w-4" /> {m.title}</Link>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <span className={`pill ${t.border} ${t.text}`}>{m.emoji} Module {m.num}</span>
+          <span className={`pill ${t.border} ${t.text}`}>{m.emoji} {m.label || `Module ${m.num}`}</span>
           {/* Estimated completion time — quiet metadata, same weight as the
               lesson counter. */}
           <span className="pill border-line text-muted" title="Estimated time to complete">
